@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('cedula')->unique();
             $table->string('name');
-            $table->string('cargo');
             $table->string('state')->default('ACTIVO');
             $table->date('fechalimite');
             $table->string('email')->unique();
@@ -23,6 +22,8 @@ return new class extends Migration
             $table->string('password');
             $table->unsignedBigInteger('cargo_id')->nullable();
             $table->foreign('cargo_id')->references('id')->on('cargos');
+            $table->unsignedBigInteger('unit_id')->nullable();
+            $table->foreign('unit_id')->references('id')->on('units');  //1 o varios
             $table->rememberToken();
             $table->softDeletes();
             $table->timestamps();

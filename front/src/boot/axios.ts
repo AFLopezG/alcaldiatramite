@@ -28,6 +28,8 @@ export default boot(({ app, router }) => {
     api.post('me').then((response) => {
       console.log(response.data)
       globalStore().user = response.data
+      globalStore().unit = response.data.unit
+      globalStore().cargo = response.data.cargo
       globalStore().isLoggedIn = true
       response.data.permisos.forEach( (r: { id: number }) => {
           if(r.id==1) globalStore().booluser=true
@@ -40,6 +42,8 @@ export default boot(({ app, router }) => {
     }).catch(() => {
       app.config.globalProperties.$api.defaults.headers.common['Authorization']=''
       globalStore().user={}
+      globalStore().unit={}
+      globalStore().cargo={}
       localStorage.removeItem('tokenTerri')
       globalStore().isLoggedIn=false
       globalStore().booluser=false
@@ -53,6 +57,8 @@ export default boot(({ app, router }) => {
   }else {
     router.push('/login')
     globalStore().user={}
+    globalStore().unit={}
+    globalStore().cargo={}
     globalStore().isLoggedIn=false
     globalStore().booluser=false
     globalStore().boolregistro=false

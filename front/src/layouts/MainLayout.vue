@@ -14,7 +14,7 @@
         <q-toolbar-title>
           <div class="row">
             <div class="">            <img             src="/logo.png"            style="height: 40px; width: 40px;"      /></div>
-            <div class="">CATASTRO URBANO GAMO <br><div style="font-size:10px">{{  store.user.cargo}}</div></div>
+            <div class="">GOBIERNO MUNICIPAL DE ORURO <br><div style="font-size:10px">  {{ store.unit.nombre }} :  {{ store.cargo.nombre }}</div></div>
 
 
 
@@ -130,7 +130,9 @@ export default defineComponent({
         this.$q.loading.show()
         this.$api.post('logout').then(() => {
           globalStore().user = {}
-          localStorage.removeItem('tokenMulti')
+          globalStore().unit = {}
+          globalStore().cargo = {}
+          localStorage.removeItem('tokenTerri')
           globalStore().isLoggedIn = false
           this.$router.push('/login')
           this.$q.loading.hide()

@@ -21,10 +21,10 @@ class User extends Authenticatable
         'cedula',
         'name',
         'email',
-        'cargo',
         'fechalimite',
         'password',
-        'cargo_id'
+        'cargo_id',
+        'unit_id',
     ];
 
     /**
@@ -48,6 +48,10 @@ class User extends Authenticatable
 
     public function cargo(){
         return $this->belongsTo(Cargo::class);
+    }
+
+    public function unit(){
+        return $this->belongsTo(Unit::class);
     }
 
     protected $casts = [

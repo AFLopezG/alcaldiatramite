@@ -30,6 +30,7 @@ Route::post('/consulta',[\App\Http\Controllers\FormularioController::class,'cons
 
         Route::apiResource('permiso', App\Http\Controllers\PermisoController::class);
         Route::apiResource('cargo', App\Http\Controllers\CargoController::class);
+        Route::apiResource('unit', App\Http\Controllers\UnitController::class);
 
         Route::resource('/cargo',\App\Http\Controllers\CargoController::class);
         Route::resource('/tramite',\App\Http\Controllers\TramiteController::class);
@@ -39,6 +40,7 @@ Route::post('/consulta',[\App\Http\Controllers\FormularioController::class,'cons
         Route::post('/micorreo',[\App\Http\Controllers\FormularioController::class,'micorreo']);
         Route::post('/searchProp',[\App\Http\Controllers\PropietarioController::class,'searchProp']);
         Route::post('/listuser',[\App\Http\Controllers\UserController::class,'listuser']);
+        Route::post('/listuserUnit',[\App\Http\Controllers\UserController::class,'listuserUnit']);
 
         Route::post('/suspender',[\App\Http\Controllers\FormularioController::class,'suspender']);
         Route::post('/finalizar',[\App\Http\Controllers\FormularioController::class,'finalizar']);

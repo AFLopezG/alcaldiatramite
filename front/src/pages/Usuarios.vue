@@ -17,62 +17,17 @@
             <q-form @submit="onSubmit" @reset="onReset" class="q-gutter-md">
               <div class="row">
                 <div class="col-md-6 col-xs-12 q-pa-xs">
-                <q-input
-                outlined
-                    v-model="dato.cedula"
-                    type="text"
-                    label="Carnet "
-                    hint="Ingresar CI"
-                    dense
-                    lazy-rules
-                    :rules="[(val) => val.length > 5 || 'Por favor ingresa datos']"
-                  />
-                  <q-input
-                  outlined
-                    v-model="dato.name"
-                    dense
-                    type="text"
-                    label="Nombre "
-                    hint="Ingresar Nombre"
-                    lazy-rules
-                    :rules="[(val) => val.length > 0 || 'Por favor ingresa datos']"
-                  />
-                  <q-select dense hint="Cargo" v-model="cargo" :options="cargos" label="Cargo" outlined />
-
-                  <q-input
-                  outlined
-                  dense
-                    v-model="dato.email"
-                    type="email"
-                    label="Email"
-                    hint="Correo electronico"
-                    lazy-rules
-                    :rules="[(val) => val.length > 0 || 'Por favor ingresa datos']"
-                  />
-
-                  <q-input
-                  outlined
-                  dense
-                    v-model="dato.password"
-                    label="Contraseña"
-                    hint="Contraseña"
-                    lazy-rules
-                    :rules="[(val) => val.length > 0 || 'Por favor ingresa datos']"
-                    :type="typePassword?'password':'text'"
-                  >
+                <q-input outlined v-model="dato.cedula" type="text" label="Carnet " hint="Ingresar CI" dense lazy-rules :rules="[(val) => val.length > 5 || 'Por favor ingresa datos']" />
+                <q-input outlined v-model="dato.name"   type="text" label="Nombre " hint="Ingresar Nombre" dense lazy-rules :rules="[(val) => val.length > 0 || 'Por favor ingresa datos']"/>
+                <q-select dense hint="Cargo" v-model="cargo" :options="cargos" label="Cargo" outlined />
+                <q-select dense hint="Unidad" v-model="unit" :options="units" label="Unidad" outlined  @filter="filterFn" use-input v-if="store.unit.id==24"/>
+                <q-input outlined dense v-model="dato.email" type="email" label="Email" hint="Correo electronico" lazy-rules :rules="[(val) => val.length > 0 || 'Por favor ingresa datos']" />
+                <q-input outlined dense v-model="dato.password" label="Contraseña" hint="Contraseña" lazy-rules :rules="[(val) => val.length > 0 || 'Por favor ingresa datos']" :type="typePassword?'password':'text'">
                   <template v-slot:append>
                             <q-icon @click="typePassword=!typePassword" :name="typePassword?'visibility':'visibility_off'" />
-                          </template>
-                        </q-input>
-                  <q-input
-                  outlined
-                  dense
-                    v-model="dato.fechalimite"
-                    type="date"
-                    label="Fecha Limite"
-                    lazy-rules
-                    :rules="[(val) => val.length > 0 || 'Por favor ingresa datos']"
-                  />
+                  </template>
+                </q-input>
+                <q-input outlined dense v-model="dato.fechalimite" type="date" label="Fecha Limite" lazy-rules :rules="[(val) => val.length > 0 || 'Por favor ingresa datos']" />
 
                 </div>
                 <div class="col-md-6 col-xs-12 q-pa-xs">
@@ -244,11 +199,13 @@
   <script>
   import { date } from 'quasar'
   import moment from 'moment'
+  import {globalStore} from   '../stores/globalStore'
 
   export default {
     name: 'UserPage',
     data () {
       return {
+        store:globalStore(),
         alert: false,
         dialog_mod: false,
         dialog_del: false,
@@ -265,6 +222,9 @@
         permisos2: [],
         modelpermiso: false,
         cargos:[],
+        unit:{},
+        units:[],
+        filterU:[],
         cargo:{},
         uni: {},
         columns: [
@@ -279,21 +239,43 @@
         data: []
       }
     },
-    created () {
+
+    mounted () {
       /* if (!this.$store.state.login.boolusuario){
          this.$router.replace({ path: '/' })
       } */
 
       this.misdatos()
       this.getCargo()
+      this.getUnit()
+      this.unit=this.store.unit
+      this.unit.label=this.unit.nombre
+      console.log(this.unit)
       this.$api.get('permiso').then(res => {
         res.data.forEach(r => {
           this.permisos.push({ id: r.id, nombre: r.nombre, estado: false })
           this.permisos2.push({ id: r.id, nombre: r.nombre, estado: false })
         })
       })
+
     },
     methods: {
+      filterFn (val, update) {
+        if (val === '') {
+          update(() => {
+            this.units = this.filterU
+
+            // here you have access to "ref" which
+            // is the Vue reference of the QSelect
+          })
+          return
+        }
+
+        update(() => {
+          const needle = val.toLowerCase()
+          this.units = this.filterU.filter(v => v.label.toLowerCase().indexOf(needle) > -1)
+        })
+      },
       cambioEstado(user1){
         this.$api.post('cambioEstado/' + user1.id).then(() => {
           this.misdatos()
@@ -308,13 +290,27 @@
             this.cargos.push(r)
             })
         })
-
       },
+
+      getUnit(){
+        this.$api.get('unit').then((res) => {
+          this.units=[]
+            res.data.forEach(r => {
+            r.label=r.nombre
+            this.units.push(r)
+            })
+            this.filterU=this.units
+        })
+      },
+
       regDialog () {
+        this.unit=this.store.unit
+        this.unit.label=this.unit.nombre
         this.dato = { fechalimite: (moment(this.fecha).add(12, 'months').format('YYYY-MM-DD')) }
         this.cargo=this.cargos[1]
         this.alert = true
       },
+
       updatepermisos () {
         this.$api.put('updatepermisos/' + this.dato2.id, { permisos: this.permisos2 }).then(() => {
           // console.log(res.data)
@@ -343,7 +339,7 @@
       },
       misdatos () {
         this.$q.loading.show()
-        this.$api.get('user').then((res) => {
+        this.$api.post('listuser').then((res) => {
           console.log(res.data)
           this.data = res.data
           this.$q.loading.hide()
