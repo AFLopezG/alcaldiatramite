@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Tramite;
 use App\Http\Requests\StoreTramiteRequest;
 use App\Http\Requests\UpdateTramiteRequest;
+use Illuminate\Http\Request;
 
 class TramiteController extends Controller
 {
@@ -15,6 +16,10 @@ class TramiteController extends Controller
     {
         //
         return Tramite::all();
+    }
+
+    public function unitTramite(Request $request){
+        return Tramite::where('estado','ACTIVO')->where('unit_id',$request->user()->unit_id)->get();
     }
 
     /**

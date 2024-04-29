@@ -36,6 +36,8 @@ Route::post('/consulta',[\App\Http\Controllers\FormularioController::class,'cons
         Route::resource('/tramite',\App\Http\Controllers\TramiteController::class);
         Route::resource('/formulario',\App\Http\Controllers\FormularioController::class);
         Route::resource('/log',\App\Http\Controllers\LogController::class);
+        Route::post('/unitTramite',[\App\Http\Controllers\TramiteController::class,'unitTramite']);
+        
 
         Route::post('/micorreo',[\App\Http\Controllers\FormularioController::class,'micorreo']);
         Route::post('/searchProp',[\App\Http\Controllers\PropietarioController::class,'searchProp']);

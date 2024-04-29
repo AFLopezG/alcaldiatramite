@@ -9,7 +9,5 @@ class Unit extends Model
 {
     use HasFactory;
 
-    public function cargos(){
-        return $this->hasMany(Cargo::class);
-    }
+
 }

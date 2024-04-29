@@ -13,8 +13,10 @@ return new class extends Migration
     {
         Schema::create('formularios', function (Blueprint $table) {
             $table->id();
+            $table->integer('numero');
+            $table->string('gestion');
             $table->string('codigo');
-            $table->string('codtramite')->nullable();
+            $table->string('codtram');
             $table->string('distrito')->nullable();
             $table->string('detalle')->nullable();
             $table->string('observacion')->nullable();

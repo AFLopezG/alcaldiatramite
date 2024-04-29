@@ -2,7 +2,7 @@
   "name": "front",
   "version": "0.0.1",
   "description": "A Quasar Project",
-  "productName": "Quasar App",
+  "productName": "Tramites GAMO",
   "author": "AFLopezG <lopez.gutierrez.a07@gmail.com>",
   "private": true,
   "scripts": {
@@ -15,7 +15,7 @@
   "dependencies": {
     "@quasar/extras": "^1.16.4",
     "axios": "^1.2.1",
-    "javascript-time-ago": "^2.5.9",
+    "javascript-time-ago": "^2.5.10",
     "moment": "^2.30.1",
     "pinia": "^2.0.11",
     "printd": "^1.6.0",

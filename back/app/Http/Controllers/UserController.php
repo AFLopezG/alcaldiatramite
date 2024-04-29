@@ -56,8 +56,8 @@ class UserController extends Controller
             return User::with('permisos')->with('cargo')->with('unit')->where("unit_id",$request->user()->unit_id)->where('id','<>',1)->get();
     }
 
-    public function listuserUnit(Request $request){
-        return User::where('state','ACTIVO')->where('unit_id',$request->user()->unit_id)->where('id','<>',1)->get();
+    public function listUserUnit(Request $request){
+        return User::with('cargo')->with('unit')->where('state','ACTIVO')->where('unit_id',$request->user()->unit_id)->where('id','<>',1)->get();
     }
 
     public function cambioEstado($id){

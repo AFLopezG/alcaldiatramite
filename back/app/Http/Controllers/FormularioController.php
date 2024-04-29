@@ -9,6 +9,7 @@ use App\Models\Log;
 use App\Models\Propietario;
 use App\Models\User;
 use App\Models\Tramite;
+use App\Models\Unit;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
@@ -45,6 +46,7 @@ class FormularioController extends Controller
         ->where('oficina',$request->oficina)->whereNull('deleted_at')
         ->with('propietario')->with('tramite')->with('logs')->get();
      }
+
      public function todos(Request $request)
      {
          $mailIds = Log::select('formulario_id')
@@ -87,6 +89,9 @@ class FormularioController extends Controller
     {
         //
         $user=User::where('id',$request->user()->id)->with('cargo')->get();
+        $unit=Unit::where('id',$request->user()->unit_id)->first();
+        $tramite=Tramite::where('id',$request->tramite_id)->first();
+
         $comp=$request->propietario['complemento'];
         if($comp==null)
             $comp='';
@@ -107,15 +112,30 @@ class FormularioController extends Controller
             $propietario->save();
         }
 
-        if(Formulario::where('numero',$request->numero)->where('gestion',$request->gestion)->where('tramite_id',$request->tramite_id)->count()>0)
+        if($request->numero == null){
+            $gestion = date('Y'); 
+            if(Formulario::where('unit_id',$request->user()->unit_id)->where('gestion',$gestion)->where('tramite_id',$request->tramite_id)->count()>=0)
+                $numero=1;
+            else{
+            $form = Formulario::where('unit_id',$request->user()->unit_id)->where('gestion',$gestion)->where('tramite_id',$request->tramite_id)->count();
+            $numero = $form->numero + 1; }            
+        }
+        else
+        {
+            $numero=$request->numero;
+            $gestion = $request->gestion; 
+        }
+
+        if(Formulario::where('numero',$numero)->where('gestion',$gestion)->where('unit_id',$unit->id)->where('tramite_id',$request->tramite_id)->count()>0)
             return response(['message' => 'YA SE ENCUENTRA REGISTRADO'],500);
 
         $formulario=new Formulario();
-        $formulario->numero=$request->numero;
-        $formulario->codigo=str_pad($request->numero, 6, '0', STR_PAD_LEFT).'/'.substr($request->gestion,2,2);
-        $formulario->gestion=$request->gestion;
+        $formulario->numero=$numero;
+        $formulario->gestion=$gestion;
+        $formulario->codigo=$tramite->codigo.'-'.$unit->codigo.str_pad($request->numero, 6, '0', STR_PAD_LEFT).'/'.substr($gestion,2,2);
+        $formulario->codtram=str_pad($request->numero, 6, '0', STR_PAD_LEFT).'/'.substr($gestion,2,2);
         $formulario->distrito=$request->distrito;
-        $formulario->direccion=$request->direccion;
+        $formulario->detalle=$request->detalle;
         $formulario->observacion=$request->observacion;
         $formulario->estado='PROCESO';
 
@@ -123,6 +143,7 @@ class FormularioController extends Controller
         $formulario->hora=date('H:i:s');
         $formulario->propietario_id=$propietario->id;
         $formulario->tramite_id=$request->tramite_id;
+        $formulario->unit_id=$unit->id;
         $formulario->user_id=$request->user()->id;
         $formulario->cargo_id=$request->user()->cargo_id;
         $formulario->save();
@@ -143,9 +164,13 @@ class FormularioController extends Controller
     {
 
         $user=User::where('id',$request->user()->id)->with('cargo')->get();
+        $unit=Unit::where('id',$request->user()->unit_id)->first();
+        $tramite=Tramite::where('id',$request->tramite_id)->first();
+
         $comp=$request->propietario['complemento'];
         if($comp==null)
             $comp='';
+
         if(Propietario::where('cedula',$request->propietario['cedula'])->where('complemento',$comp)->count()==0)
             {
                 $propietario=new Propietario;
@@ -163,20 +188,47 @@ class FormularioController extends Controller
             $propietario->save();
         }
 
-        if(Formulario::where('numero',$request->numero)->where('gestion',$request->gestion)->where('tramite_id',$request->tramite_id)->count()>1)
-            return response()->json(['message' => 'YA SE ENCUENTRA REGISTRADO'], 422);
+        $f1=Formulario::find($request->id);
+        if($f1->numero==$request->numero && $f1->gestion==$request->gestion && $f1->tramite_id==$request->tramite_id){
+            $numero = $request->numero;
+            $gestion = $request->gestion; 
+        }
+            else{
+                
+        if($request->numero == null){
+            $gestion = date('Y'); 
+            if(Formulario::where('unit_id',$request->user()->unit_id)->where('gestion',$gestion)->where('tramite_id',$request->tramite_id)->count()>=0)
+                $numero=1;
+            else{
+            $form = Formulario::where('unit_id',$request->user()->unit_id)->where('gestion',$gestion)->where('tramite_id',$request->tramite_id)->count();
+            $numero = $form->numero + 1; }  
+        }
+        else
+        {
+            $numero=$request->numero;
+            $gestion = $request->gestion; 
+        }
+        if(Formulario::where('numero',$numero)->where('gestion',$gestion)->where('unit_id',$unit->id)->where('tramite_id',$request->tramite_id)->count()>0)
+        return response(['message' => 'YA SE ENCUENTRA REGISTRADO'],500);
+    }
 
         $formulario=Formulario::find($request->id);
-        $formulario->numero=$request->numero;
-        $formulario->codigo=str_pad($request->numero, 6, '0', STR_PAD_LEFT).'/'.substr($request->gestion,2,2);
-        $formulario->gestion=$request->gestion;
+        $formulario->numero=$numero;
+        $formulario->gestion=$gestion;
+        $formulario->codigo=$tramite->codigo.'-'.$unit->codigo.str_pad($request->numero, 6, '0', STR_PAD_LEFT).'/'.substr($gestion,2,2);
+        $formulario->codtram=str_pad($request->numero, 6, '0', STR_PAD_LEFT).'/'.substr($gestion,2,2);
         $formulario->distrito=$request->distrito;
-        $formulario->direccion=$request->direccion;
+        $formulario->detalle=$request->detalle;
         $formulario->observacion=$request->observacion;
         $formulario->estado='PROCESO';
 
+        $formulario->fecha=date('Y-m-d');
+        $formulario->hora=date('H:i:s');
         $formulario->propietario_id=$propietario->id;
         $formulario->tramite_id=$request->tramite_id;
+        $formulario->unit_id=$unit->id;
+        $formulario->user_id=$request->user()->id;
+        $formulario->cargo_id=$request->user()->cargo_id;
         $formulario->save();
 
         return $formulario;
@@ -198,8 +250,8 @@ class FormularioController extends Controller
                     where formulario_id in (SELECT l2.formulario_id from logs l2
                     inner join formularios f on f.id=l2.formulario_id
                     inner join propietarios p on p.id=f.propietario_id
-                    where l2.user_id2=".$request->user()->id." and f.estado IN ('PROCESO') and f.deleted_at is null
-                    and (f.codigo like '%".$searchdata."%'  or p.apellido LIKE '%".$searchdata."%' or p.nombre LIKE '%".$searchdata."%'))
+                    where l2.user_id2=".$request->user()->id." and f.estado IN ('PROCESO') and f.deleted_at is null and f.unit_id = ".$request->user()->unit_id."
+                    and (f.codtram like '%".$searchdata."%'  or p.apellido LIKE '%".$searchdata."%' or p.nombre LIKE '%".$searchdata."%'))
                     GROUP by formulario_id order by id desc");
                     break;
                 case 'suspendido':
@@ -207,8 +259,8 @@ class FormularioController extends Controller
                     from logs
                     where formulario_id in (SELECT l2.formulario_id from logs l2 inner join formularios f on f.id=l2.formulario_id
                     inner join propietarios p on p.id=f.propietario_id
-                    where l2.user_id2=".$request->user()->id." and f.estado IN ('SUSPENDIDO') and f.deleted_at is null
-                    and (f.codigo like '%".$searchdata."%'  or p.apellido LIKE '%".$searchdata."%' or p.nombre LIKE '%".$searchdata."%'))
+                    where l2.user_id2=".$request->user()->id." and f.estado IN ('SUSPENDIDO') and f.deleted_at is null and f.unit_id = ".$request->user()->unit_id."
+                    and (f.codtram like '%".$searchdata."%'  or p.apellido LIKE '%".$searchdata."%' or p.nombre LIKE '%".$searchdata."%'))
                     GROUP by formulario_id order by id desc");
                     break;
                 case 'finalizado':
@@ -216,8 +268,8 @@ class FormularioController extends Controller
                     from logs
                     where formulario_id in (SELECT l2.formulario_id from logs l2 inner join formularios f on f.id=l2.formulario_id
                     inner join propietarios p on p.id=f.propietario_id
-                    where l2.user_id2=".$request->user()->id." and f.estado IN ('FINALIZADO') and f.deleted_at is null
-                    and (f.codigo like '%".$searchdata."%'  or p.apellido LIKE '%".$searchdata."%' or p.nombre LIKE '%".$searchdata."%'))
+                    where l2.user_id2=".$request->user()->id." and f.estado IN ('FINALIZADO') and f.deleted_at is null and f.unit_id = ".$request->user()->unit_id."
+                    and (f.codtram like '%".$searchdata."%'  or p.apellido LIKE '%".$searchdata."%' or p.nombre LIKE '%".$searchdata."%'))
                     GROUP by formulario_id order by id desc");
                     break;
                 case 'todo':
@@ -226,8 +278,8 @@ class FormularioController extends Controller
                 where formulario_id in (SELECT l2.formulario_id from logs l2
                 inner join formularios f on f.id=l2.formulario_id
                 inner join propietarios p on p.id=f.propietario_id
-                where l2.user_id2=".$request->user()->id." and f.deleted_at is null
-                  and (f.codigo like '%".$searchdata."%'  or p.apellido LIKE '%".$searchdata."%' or p.nombre LIKE '%".$searchdata."%'))
+                where l2.user_id2=".$request->user()->id." and f.deleted_at is null and f.unit_id = ".$request->user()->unit_id."
+                  and (f.codtram like '%".$searchdata."%'  or p.apellido LIKE '%".$searchdata."%' or p.nombre LIKE '%".$searchdata."%'))
                   GROUP by formulario_id order by id desc");
                 break;
                 default:
@@ -237,7 +289,7 @@ class FormularioController extends Controller
                 inner join formularios f on f.id=l2.formulario_id
                 inner join propietarios p on p.id=f.propietario_id
                 where l2.user_id2=".$request->user()->id." and f.deleted_at is null
-                  and (f.codigo like '%".$searchdata."%'  or p.apellido LIKE '%".$searchdata."%' or p.nombre LIKE '%".$searchdata."%'))
+                  and (f.codtram like '%".$searchdata."%'  or p.apellido LIKE '%".$searchdata."%' or p.nombre LIKE '%".$searchdata."%'))
                   GROUP by formulario_id order by id desc");
                     break;
             }
@@ -273,6 +325,13 @@ class FormularioController extends Controller
             ->whereNull('deleted_at')
             ->orderBy('id','desc')->paginate($paginate);
         }
+    }
+
+    public function cambioAsignado(Request $request){
+        $form1 = Formulario:: find($request->id);
+        $logult= Log::where('formulario_id',$form1->id)->max('id');
+        $logult->user_id2=$request->user_id;
+        $logult->save();
     }
 
     public function printReq($id){

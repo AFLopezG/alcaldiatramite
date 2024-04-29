@@ -19,8 +19,9 @@
                     <div class="col-md-6 col-xs-12 q-pa-xs"><q-select dense label="Tramite" v-model="tramite" :options="tramites" required outlined  /></div>
                     <div class="col-md-2 col-xs-12 q-pa-xs"> <q-input required dense label="numero"   type="number"   autofocus  v-model="dato.numero" outlined />                      </div>
                     <div class="col-md-2 col-xs-12 q-pa-xs"><q-input dense label="Gestion" v-model="dato.gestion" type="number" required outlined   :rules="[val => val>1900 && val<9999 || 'Ingrese gestion ']"/></div>
-                    <div class="col-md-2 col-xs-12 q-pa-xs"><q-select dense label="Distrito" v-model="dato.distrito" :options="['D1','D2','D3','D4','D5','D6']" required outlined  /></div>
-                    <div class="col-md-12 col-xs-12  q-pa-xs"><q-input dense label="Direccion" v-model="dato.direccion"  required outlined  /></div><br>
+                    <div class="col-md-2 col-xs-12 q-pa-xs"><q-select dense label="Distrito" v-model="dato.distrito" :options="['','D1','D2','D3','D4','D5','D6']" outlined  /></div>
+                    <div class="col-md-12 col-xs-12  q-pa-xs"><q-input dense label="Detalle" v-model="dato.detalle"  outlined  /></div><br>
+                    <div class="col-md-12 col-xs-12  q-pa-xs"><q-input dense label="Observacion" v-model="dato.observacion"  outlined  /></div><br>
 
                     <div class="col-sm-4 col-12 q-pa-xs"><q-input v-model="propietario.cedula" label="nro carnet" dense required outlined @keyup="buscarProp"/></div>
                     <div class="col-sm-4 col-12 q-pa-xs"><q-input v-model="propietario.complemento" type="text" label="Complemento" dense  outlined  @keyup="buscarProp" style="text-transform: uppercase;"/></div>
@@ -264,6 +265,8 @@
 import { globalStore } from '../stores/globalStore'
 import es from 'javascript-time-ago/locale/es'
 import {Printd} from 'printd'
+TimeAgo.addDefaultLocale(es)
+          const timeAgo = new TimeAgo('es-ES')
   export default {
     name: 'AsignacionPage',
     data(){
@@ -465,7 +468,7 @@ import {Printd} from 'printd'
       },
       getTramites(){
         this.tramites=[]
-        this.$api.get('tramite').then((res) => {
+        this.$api.post('unitTramite').then((res) => {
         console.log(res.data)
           res.data.forEach(r => {
             r.label=r.nombre
@@ -649,11 +652,9 @@ import {Printd} from 'printd'
         console.log(this.tipoasignacion)
         this.$api.post('micorreo',{tipoasignacion:this.tipoasignacion,search:this.filter,page:this.current}).then(res=>{
             console.log(res.data)
-          TimeAgo.addDefaultLocale(es)
 
           this.current= res.data.current_page
           this.last_page= res.data.last_page
-          const timeAgo = new TimeAgo('es-ES')
           res.data.data.forEach(r=>{
               const dias = timeAgo.format(Date.parse( r.fecha + ' ' + r.hora))
               this.formularios.push({
@@ -669,7 +670,8 @@ import {Printd} from 'printd'
               tramite:r.formulario.tramite.nombre,
               ftram:r.formulario.tramite,
               propietario:r.formulario.propietario,
-              obs:r.formulario.observacion,
+              observacion:r.formulario.observacion,
+              detalle:r.formulario.detalle,
               cedula:r.formulario.propietario.cedula+(r.formulario.propietario.complemento==''?'':'-'+r.formulario.propietario.complemento),
               user_id0:r.formulario.user_id,
               user_id2:r.user_id2,
@@ -795,10 +797,13 @@ import {Printd} from 'printd'
           cancel:true,
           persistent:true
         }).onOk(()=>{
-          if(this.propietario.complemento==undefined) this.propietario.complemento=''
+          this.$q.loading.show()
+          if(this.propietario.complemento==undefined) 
+          this.propietario.complemento=''
           this.dato.tramite_id=this.tramite.id
-          this.dato.propietario=this.propietario
-          if(this.dato.id==undefined || this.dato.id==''){
+          this.dato.propietario=this.propietario 
+          console.log(this.dato.id==undefined && this.dato.id=='')
+          if(this.dato.id==undefined && this.dato.id==''){
             // console.log('new')
             this.$q.loading.show()
             this.$api.post('formulario',this.dato).then(res=>{
@@ -808,11 +813,12 @@ import {Printd} from 'printd'
               this.codigo= res.data.codigo
               this.misdatos()
               this.crear=false
+              this.$q.loading.hide()
             }).catch(error=>{
               console.log('error',error)
               this.$q.loading.hide()
               this.$q.notify({
-                message:error.data.response.message,
+                message:error,
                 color:'red',
                 icon:'error'
               })

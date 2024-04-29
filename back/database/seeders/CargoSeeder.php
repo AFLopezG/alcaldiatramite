@@ -34,7 +34,7 @@ class CargoSeeder extends Seeder
             ["nombre"=>"SECRETARIA"],
             ["nombre"=>"ASESOR LEGAL"],
 
-            //["nombre"=>"AREA LEGAL","unit_id"=>34],
+            //["nombre"=>"AREA LEGAL","unit_id"=>34], 14
             ["nombre"=>"JEFATURA CONTROL URBANO"],
             ["nombre"=>"RESPONSABLE SANITARIO Y ESTRUCTURAL"],      
             ["nombre"=>"RESPONSABLE DE PLANOS DE INGENIERIA"],

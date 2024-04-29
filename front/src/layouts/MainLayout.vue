@@ -62,13 +62,13 @@
                 <q-item-section avatar>
                   <q-icon name="source" />
                 </q-item-section>
-                <q-item-section>Todo</q-item-section>
+                <q-item-section>TODO</q-item-section>
               </q-item>
               <q-item dense clickable v-ripple class="q-pl-xl" to="/asignacion/proceso">
                 <q-item-section avatar>
                   <q-icon name="schedule" />
                 </q-item-section>
-                <q-item-section>Pendientes</q-item-section>
+                <q-item-section>PENDIENTE</q-item-section>
               </q-item>
               <q-item dense clickable v-ripple class="q-pl-xl" to="/asignacion/suspendido">
                 <q-item-section avatar>

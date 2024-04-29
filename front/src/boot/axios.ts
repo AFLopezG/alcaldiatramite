@@ -37,7 +37,8 @@ export default boot(({ app, router }) => {
           if(r.id==3) globalStore().boolasignacion=true
           if(r.id==4) globalStore().boolseg=true
           if(r.id==5) globalStore().booldelete=true
-          if(r.id==6) globalStore().boolanual=true
+          if(r.id==6) globalStore().boolreporte=true
+          if(r.id==7) globalStore().boolcambio=true
       });
     }).catch(() => {
       app.config.globalProperties.$api.defaults.headers.common['Authorization']=''
@@ -51,8 +52,9 @@ export default boot(({ app, router }) => {
       globalStore().boolasignacion=false
       globalStore().boolseg=false
       globalStore().booldelete=false
-      globalStore().boolanual=false
-      router.push('/login')
+      globalStore().boolreporte=false
+     globalStore().boolcambio=false
+          router.push('/login')
     })
   }else {
     router.push('/login')
@@ -65,8 +67,9 @@ export default boot(({ app, router }) => {
     globalStore().boolasignacion=false
     globalStore().boolseg=false
     globalStore().booldelete=false
-    globalStore().boolanual=false
-    localStorage.removeItem('tokenTerri')
+    globalStore().boolreporte=false
+     globalStore().boolcambio=false
+     localStorage.removeItem('tokenTerri')
     globalStore().isLoggedIn=false
   }
 

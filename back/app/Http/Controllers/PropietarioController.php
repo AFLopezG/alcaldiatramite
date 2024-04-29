@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Propietario;
 use App\Http\Requests\StorePropietarioRequest;
 use App\Http\Requests\UpdatePropietarioRequest;
+use Illuminate\Http\Request;
 
 class PropietarioController extends Controller
 {
@@ -32,6 +33,12 @@ class PropietarioController extends Controller
         //
     }
 
+    public function searchProp(Request $request){
+        if($request->complemento!=null)
+            return Propietario::where('cedula',$request->cedula)->where('complemento',$request->complemento)->first();
+        else
+            return Propietario::where('cedula',$request->cedula)->first();
+    }
     /**
      * Display the specified resource.
      */

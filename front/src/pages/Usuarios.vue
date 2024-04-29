@@ -231,6 +231,7 @@
           { name: 'cedula', align: 'left', label: 'CI ', field: 'cedula', sortable: true },
           { name: 'name', align: 'left', label: 'NOMBRE ', field: 'name', sortable: true },
           { name: 'cargo', align: 'left', label: 'CARGO ', field: row=>row.cargo.nombre, sortable: true },
+          { name: 'unit', align: 'left', label: 'UNIDAD ', field: row=>row.unit.nombre, sortable: true },
           { name: 'email', align: 'left', label: 'E-MAIL', field: 'email', sortable: true },
           { name: 'estado', align: 'left', label: 'ESTADO', field: 'state', sortable: true },
           { name: 'permisos', align: 'left', label: 'PERMISOS', field: 'permisos', sortable: true },
@@ -366,6 +367,7 @@
           fechalimite: this.dato.fechalimite,
           cargo_id:this.cargo.id,
           cargo:this.cargo.nombre,
+          unit_id:this.unit.id,
           permisos: this.permisos
         }).then(() => {
           // console.log(res.data)
