@@ -7,32 +7,35 @@
           <q-btn label="Actualizar" icon="refresh" color="amber-5" @click="actualizar" />
 
           <q-dialog full-width v-model="crear">
-            <q-card>
+            <q-card class="my-card" flat bordered>
               <q-card-section>
                 <div class="text-h6" v-if="dato.id==undefined">REGISTRO DE FORMULARIO TRAMITE</div>
                 <div class="text-h6" v-else>MODIFICAR DATOS DE TRAMITE</div>
   <!--              <pre>{{dato}}</pre>-->
               </q-card-section>
-              <q-card-section class="q-pt-none">
+              <q-card-section >
                 <q-form @submit.prevent="guardar">
-                  <div class="row" style="border: 1px solid rgba(128,128,128,0.50)">
-                    <div class="col-md-6 col-xs-12 q-pa-xs"><q-select dense label="Tramite" v-model="tramite" :options="tramites" required outlined  /></div>
-                    <div class="col-md-2 col-xs-12 q-pa-xs"> <q-input required dense label="numero"   type="number"   autofocus  v-model="dato.numero" outlined />                      </div>
-                    <div class="col-md-2 col-xs-12 q-pa-xs"><q-input dense label="Gestion" v-model="dato.gestion" type="number" required outlined   :rules="[val => val>1900 && val<9999 || 'Ingrese gestion ']"/></div>
-                    <div class="col-md-2 col-xs-12 q-pa-xs"><q-select dense label="Distrito" v-model="dato.distrito" :options="['','D1','D2','D3','D4','D5','D6']" outlined  /></div>
-                    <div class="col-md-12 col-xs-12  q-pa-xs"><q-input dense label="Detalle" v-model="dato.detalle"  outlined  /></div><br>
-                    <div class="col-md-12 col-xs-12  q-pa-xs"><q-input dense label="Observacion" v-model="dato.observacion"  outlined  /></div><br>
+                  <div class="row" style="border: 1px solid rgba(128,128,128,0.90)">
 
-                    <div class="col-sm-4 col-12 q-pa-xs"><q-input v-model="propietario.cedula" label="nro carnet" dense required outlined @keyup="buscarProp"/></div>
-                    <div class="col-sm-4 col-12 q-pa-xs"><q-input v-model="propietario.complemento" type="text" label="Complemento" dense  outlined  @keyup="buscarProp" style="text-transform: uppercase;"/></div>
-                    <div class="col-sm-6 col-12 q-pa-xs"><q-input v-model="propietario.nombre" type="text" label="Nombres" dense required outlined style="text-transform: uppercase;"/></div>
-                    <div class="col-sm-6 col-12 q-pa-xs"><q-input v-model="propietario.apellido" type="text" label="Apellidos" dense required outlined style="text-transform: uppercase;"/></div>
+                    <div class="col-md-6 col-xs-12 q-pa-xs"><q-select dense label="TRAMITE" v-model="tramite" :options="tramites" required outlined  /></div>
+                    <div class="col-md-2 col-xs-12 q-pa-xs"> <q-input class="inputPrice" required dense label="NUMERO"   type="number"   autofocus  v-model="dato.numero" outlined />                      </div>
+                    <div class="col-md-2 col-xs-12 q-pa-xs"><q-input class="inputPrice" dense label="GESTION" v-model="dato.gestion" type="number" required outlined   :rules="[val => val>1900 && val<9999 || 'Ingrese gestion ']"/></div>
+                    <div class="col-md-2 col-xs-12 q-pa-xs"><q-select dense label="DISTRITO" v-model="dato.distrito" :options="['','D1','D2','D3','D4','D5','D6']" outlined  /></div>
+                    <div class="col-md-12 col-xs-12  q-pa-xs"><q-input dense label="DETALLE" v-model="dato.detalle"  outlined  /></div>
+                    <!--<div class="col-md-12 col-xs-12  q-pa-xs"><q-input dense label="Observacion" v-model="dato.observacion"  outlined  /></div> -->
+                  </div><br>
+                  <div class="row" style="border: 1px solid rgba(128,128,128,0.90)">
+
+                    <div class="col-sm-4 col-xs-6 q-pa-xs"><q-input class="inputPrice" v-model="propietario.cedula" label="NRO CARNET" type="number" dense required outlined @keyup="buscarProp"/></div>
+                    <div class="col-sm-4 col-xs-6 q-pa-xs"><q-input v-model="propietario.complemento" type="text" label="COMPLEMENTO" dense  outlined  @keyup="buscarProp" style="text-transform: uppercase;"/></div>
+                    <div class="col-sm-6 col-xs-12 q-pa-xs"><q-input v-model="propietario.nombre" type="text" label="Nombres" dense required outlined style="text-transform: uppercase;"/></div>
+                    <div class="col-sm-6 col-xs-12 q-pa-xs"><q-input v-model="propietario.apellido" type="text" label="Apellidos" dense required outlined style="text-transform: uppercase;"/></div>
                     <!--<div class="col-sm-12 col-12 q-pa-xs"><q-input v-model="dato.observacion" type="text" label="Observacion" dense outlined/></div>-->
+                  </div>
                     <div class="col-sm-2 col-12 q-pa-xs flex flex-center">
                       <q-btn type="submit" color="primary" icon="add_circle" label="Registrar" v-if="dato.id==undefined || dato.id==''" dense/>
                       <q-btn type="submit" color="amber" icon="edit" label="Modificar" v-else dense/>
                     </div>
-                  </div>
                 </q-form>
 
               </q-card-section>
@@ -121,7 +124,7 @@
                             <q-item-label>DERIVAR</q-item-label>
                           </q-item-section>
                         </q-item>
-                        <q-item clickable v-close-popup @click="suspende(props.row)" v-if="props.row.estado=='PROCESO' || props.row.estado=='SUSPENDIDO'">
+                        <q-item clickable v-close-popup @click="suspende(props.row)" v-if="props.row.estado=='PROCESO'">
                           <q-item-section>
                             <q-item-label>SUSPENDER</q-item-label>
                           </q-item-section>
@@ -241,10 +244,11 @@
                 <div class="text-h6"> <q-icon name="list"/> Datos de Formulario</div>
               </q-card-section>
               <q-card-section class="q-pt-none">
-                <div><b>Codigo: </b> {{ informacion.codigo}} <b>Tramite: </b> {{ informacion.tramite}}<b> Oficina: </b> {{ informacion.oficina}}</div>
-                <div><b>Propietario: </b> {{ informacion.propietario.nombre }} {{ informacion.propietario.apellido }} <b> Cedula :</b> {{ informacion.cedula}}</div>
+                <div><b>Codigo: </b> {{ informacion.codigo}} <b>Tramite: </b> {{ informacion.tramite}}</div>
+                <div><b>Propietario: </b> {{ informacion.propietario.nombre }} {{ informacion.propietario.apellido }} <b> Cedula :</b> {{ informacion.cedula}} {{ informacion.complemento }}</div>
                 <div><b>Estado: </b> {{ informacion.estado}}</div>
-                <div><b>Observacion: </b>{{ informacion.obs}}</div>
+                <div><b>Detalle: </b>{{ informacion.detalle}}</div>
+                <div><b>Observacion: </b>{{ informacion.observacion}}</div>
               </q-card-section>
               <q-card-section align="right">
                 <q-btn flat label="Cancelar" color="primary" icon="delete" v-close-popup />
@@ -436,7 +440,7 @@ TimeAgo.addDefaultLocale(es)
         this.usuarios=[]
         this.$api.post('listuser').then((res) => {
           res.data.forEach(r => {
-            r.label=r.cargo + ' ' + r.name
+            r.label=r.cargo.nombre + ' ' + r.name
             this.usuarios.push(r)
           })
           this.usuarios2=this.usuarios
@@ -569,13 +573,6 @@ TimeAgo.addDefaultLocale(es)
         })
       },
 
-      misdestinatarios(){
-        this.$api.get(process.env.API+'/destinatarios').then(res=>{
-          console.log('destinatarios: ', res.data)
-          this.destinatarios=res.data
-          // this.remitentes2=res.data
-        })
-      },
 
       archivar(mail){
         this.$q.dialog({
@@ -797,13 +794,14 @@ TimeAgo.addDefaultLocale(es)
           cancel:true,
           persistent:true
         }).onOk(()=>{
+          console.log(this.dato)
           this.$q.loading.show()
           if(this.propietario.complemento==undefined) 
           this.propietario.complemento=''
           this.dato.tramite_id=this.tramite.id
           this.dato.propietario=this.propietario 
-          console.log(this.dato.id==undefined && this.dato.id=='')
-          if(this.dato.id==undefined && this.dato.id==''){
+          console.log(this.dato.id==undefined || this.dato.id=='')
+          if(this.dato.id==undefined || this.dato.id==''){
             // console.log('new')
             this.$q.loading.show()
             this.$api.post('formulario',this.dato).then(res=>{
@@ -832,15 +830,14 @@ TimeAgo.addDefaultLocale(es)
               this.dato={gestion:date.formatDate(Date.now(),'YYYY')};
               this.crear=false
               this.misdatos(this.pagination.page,this.filter,this.pagination.rowsPerPage)
-              this.misremitentes()
-              this.misdestinatarios()
             }).catch(err=>{
-              this.$q.loading.hide()
+              console.log(err)
               this.$q.notify({
                 message:err,
                 color:'red',
                 icon:'error'
               })
+              this.$q.loading.hide()
             })
           }
         })
@@ -851,6 +848,17 @@ TimeAgo.addDefaultLocale(es)
   }
   </script>
 
-  <style scoped>
-
+  <style  scoped>
+  .my-card{
+  width: 100%;
+  max-width: 250px;}
+  .inputPrice >>> input[type="number"] {
+  -moz-appearance: textfield;
+    }
+    .inputPrice >>> input::-webkit-outer-spin-button,
+    .inputPrice >>> input::-webkit-inner-spin-button {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+    }
   </style>

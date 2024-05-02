@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Route;
 */
 Route::post('login', [App\Http\Controllers\UserController::class, 'login']);
 Route::post('/consulta',[\App\Http\Controllers\FormularioController::class,'consulta']);
+Route::post('/listForm',[\App\Http\Controllers\FormularioController::class,'listForm']);
+Route::post('/consprop',[\App\Http\Controllers\FormularioController::class,'consprop']);
 
 //Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     Route::group(['middleware' => 'auth:sanctum'], function () {
@@ -36,7 +38,8 @@ Route::post('/consulta',[\App\Http\Controllers\FormularioController::class,'cons
         Route::resource('/tramite',\App\Http\Controllers\TramiteController::class);
         Route::resource('/formulario',\App\Http\Controllers\FormularioController::class);
         Route::resource('/log',\App\Http\Controllers\LogController::class);
-        Route::post('/unitTramite',[\App\Http\Controllers\TramiteController::class,'unitTramite']);
+        Route::post('/unitTramite',[\App\Http\Controllers\TramiteController::class,'unitTramite']); 
+        Route::post('/listForm2',[\App\Http\Controllers\FormularioController::class,'listForm2']);
         
 
         Route::post('/micorreo',[\App\Http\Controllers\FormularioController::class,'micorreo']);

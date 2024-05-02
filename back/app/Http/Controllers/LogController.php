@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Log;
+use App\Models\User;
+use App\Models\Formulario;
 use App\Http\Requests\StoreLogRequest;
 use App\Http\Requests\UpdateLogRequest;
 
@@ -30,6 +32,21 @@ class LogController extends Controller
     public function store(StoreLogRequest $request)
     {
         //
+
+        $user2=User::find($request->user_id);
+        $log=new Log;
+        $log->fecha=date('Y-m-d');
+        $log->hora=date('H:i:s');
+        $log->obs=$request->obs;
+        $log->user_id=$request->user()->id;
+        $log->user_id2=$request->user_id;    
+        $log->formulario_id=$request->formulario_id;
+        $log->cargo_id=$user2->cargo_id;
+        $log->save();
+
+        $formulario=Formulario::find($request->formulario_id);
+        $formulario->estado='PROCESO';
+        $formulario->save();
     }
 
     /**

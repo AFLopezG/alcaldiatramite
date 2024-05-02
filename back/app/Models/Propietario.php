@@ -16,4 +16,8 @@ class Propietario extends Model
         'nombre',
         'apellido',
     ];
+
+    public function formularios(){
+        return $this->hasMany(Formulario::class)->with('tramite')->whereNull('deleted_at');
+    }
 }
