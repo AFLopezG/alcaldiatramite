@@ -21,6 +21,13 @@
                     <div class="col-md-2 col-xs-12 q-pa-xs"> <q-input class="inputPrice" required dense label="NUMERO"   type="number"   autofocus  v-model="dato.numero" outlined />                      </div>
                     <div class="col-md-2 col-xs-12 q-pa-xs"><q-input class="inputPrice" dense label="GESTION" v-model="dato.gestion" type="number" required outlined   :rules="[val => val>1900 && val<9999 || 'Ingrese gestion ']"/></div>
                     <div class="col-md-2 col-xs-12 q-pa-xs"><q-select dense label="DISTRITO" v-model="dato.distrito" :options="['','D1','D2','D3','D4','D5','D6']" outlined  /></div>
+                    <div class="col-md-6 col-xs-12 q-pa-xs">
+                      <q-input style="text-transform: uppercase;" dense label="Gestor CI" v-model="dato.gestorci"  outlined list="gestores" name="myBrowser" @update:model-value="cambio" />
+                    <datalist id="gestores">
+                      <option v-for="r in gestores" :key="r.gestorci">{{r.gestorci}}</option>
+                    </datalist>
+                    </div>
+                    <div class="col-md-6 col-xs-12 q-pa-xs"><q-input style="text-transform: uppercase;" dense label="Gestor Nombre" v-model="dato.gestornom"  outlined  /></div>
                     <div class="col-md-12 col-xs-12  q-pa-xs"><q-input dense label="DETALLE" v-model="dato.detalle"  outlined  /></div>
                     <!--<div class="col-md-12 col-xs-12  q-pa-xs"><q-input dense label="Observacion" v-model="dato.observacion"  outlined  /></div> -->
                   </div><br>
@@ -313,6 +320,7 @@ TimeAgo.addDefaultLocale(es)
         tipodoc:null,
         derivaciones: [],
         dialogayudaremitir:false,
+        gestores:[],
         columns:[
           {name:'opciones',field:'opciones',label:'OPCIONES',align:'right'},
           {name:'codigo',field:'codigo',label:'CODIGO',align:'left'},
@@ -354,9 +362,32 @@ TimeAgo.addDefaultLocale(es)
       this.misdatos()
       this.getTramites()
       this.getUser()
+      this.getGestor()
       console.log('tipo de asignacion:  ',this.tipoasignacion)
     },
     methods:{
+      cambio(){
+      this.dato.gestornom=''
+       console.log(this.dato.gestorci)
+      this.gestores.find(r=>{ 
+        if (r.gestorci===this.dato.gestorci){
+          // console.log(r.cargo)
+          this.dato.gestornom=r.gestornom
+          return false
+        }else{
+          // this.cargo=''
+          // this.institucion=''
+        }
+      })
+    },
+      getGestor(){
+        this.$api.get('listGestor').then((res) => {
+          console.log(res.data)
+          this.gestores=[]
+          this.gestores=res.data
+        })
+
+      },
       cargarMod(frm){
         this.dato=frm
         this.propietario=frm.propietario
@@ -699,7 +730,7 @@ TimeAgo.addDefaultLocale(es)
             return false
           tramite.requisitos.forEach(r => {
             i++
-            detalle += '<tr><td>'+i+'</td><td style="padding:5px">'+r.detalle+'</td><td></td><td></td></tr>'
+            detalle += '<tr><td>'+i+'</td><td class="contenido" style="padding:5px">'+r.detalle+'</td><td></td><td></td></tr>'
           });
           let cadena = `<html><style>
         .cuerpo{
@@ -711,6 +742,9 @@ TimeAgo.addDefaultLocale(es)
                 width:100%;
                 border-collapse: collapse;
               }
+              .contenido{
+                font-size:12px
+              }
               .titulo{
               text-align:center;
               font-weight:bold;
@@ -721,13 +755,14 @@ TimeAgo.addDefaultLocale(es)
         </style>
         <body class='cuerpo'>
         <table><tr><td style='width:20%'><img src='escudo.jpg' width="100px" height='100px'/></td>
-          <td class='titulo'>GOBIERNO AUTONOMO MUNICIPAL DE ORURO <br>SECRETARIA MUNICIPAL DE GESTIÓN TERRITORIAL</td>
+          <td class='titulo'>GOBIERNO AUTONOMO MUNICIPAL DE ORURO <br>`+ tramite.unit.nombre + `</td>
           <td><img src='quir.jpg' width="150px" height='80px'/></td></tr></table>
           <div class='titulo'>CONTROL DE DOCUMENTACION</div>
           <div class='titulo'>`+ tramite.nombre + `</div>
         <table><tr>
           <th style='text-align:left'>NOMBRE:</th><td>`+propie.nombre+' '+propie.apellido +`</td><th>Nº TRAMITE</th></tr>
-          <tr><th style='text-align:left'>FECHA:</th><td>`+formulario.fecha  +'</td><td style="text-align:center">'+formulario.codigo+`</td></tr>
+          <tr><th style='text-align:left'>FECHA:</th><td>`+formulario.fecha  +'</td><td style="text-align:center">'+formulario.codtram+`</td></tr>
+          <tr><td colspan=3>`+formulario.detalle  +`</td></tr>
         </table>
         <table class='tabla'>
           <tr><th style='width:5%'>No</th><th style='width:80%'>REQUISITOS</th><th style='width:5%'>SI</th><th style='width:5%'>NO</th></tr>
@@ -807,9 +842,11 @@ TimeAgo.addDefaultLocale(es)
             this.$api.post('formulario',this.dato).then(res=>{
               console.log(res.data)
               this.dato={gestion:date.formatDate(Date.now(),'YYYY')};
+              this.propietario={}
               this.filter=''
               this.codigo= res.data.codigo
               this.misdatos()
+              this.getGestor()
               this.crear=false
               this.$q.loading.hide()
             }).catch(error=>{
@@ -830,6 +867,7 @@ TimeAgo.addDefaultLocale(es)
               this.dato={gestion:date.formatDate(Date.now(),'YYYY')};
               this.crear=false
               this.misdatos(this.pagination.page,this.filter,this.pagination.rowsPerPage)
+              this.getGestor()
             }).catch(err=>{
               console.log(err)
               this.$q.notify({

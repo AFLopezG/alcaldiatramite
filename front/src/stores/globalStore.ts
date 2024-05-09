@@ -4,7 +4,7 @@ export const globalStore = defineStore('global', {
   state: () => ({
     counter: 0,
     user: {},
-    unit: {},
+    units: '',
     cargo: {},
     isLoggedIn: !!localStorage.getItem('tokenTerri'),
 

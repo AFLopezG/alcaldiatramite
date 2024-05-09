@@ -20,7 +20,7 @@
                 <q-input outlined v-model="dato.cedula" type="text" label="Carnet " hint="Ingresar CI" dense lazy-rules :rules="[(val) => val.length > 5 || 'Por favor ingresa datos']" />
                 <q-input outlined v-model="dato.name"   type="text" label="Nombre " hint="Ingresar Nombre" dense lazy-rules :rules="[(val) => val.length > 0 || 'Por favor ingresa datos']"/>
                 <q-select dense hint="Cargo" v-model="cargo" :options="cargos" label="Cargo" outlined />
-                <q-select dense hint="Unidad" v-model="unit" :options="units" label="Unidad" outlined  @filter="filterFn" use-input v-if="store.unit.id==24"/>
+                <!--<q-select dense hint="Unidad" v-model="unit" :options="units" label="Unidad" outlined  @filter="filterFn" use-input v-if="store.unit.id==24"/>-->
                 <q-input outlined dense v-model="dato.email" type="email" label="Email" hint="Correo electronico" lazy-rules :rules="[(val) => val.length > 0 || 'Por favor ingresa datos']" />
                 <q-input outlined dense v-model="dato.password" label="Contraseña" hint="Contraseña" lazy-rules :rules="[(val) => val.length > 0 || 'Por favor ingresa datos']" :type="typePassword?'password':'text'">
                   <template v-slot:append>
@@ -231,7 +231,7 @@
           { name: 'cedula', align: 'left', label: 'CI ', field: 'cedula', sortable: true },
           { name: 'name', align: 'left', label: 'NOMBRE ', field: 'name', sortable: true },
           { name: 'cargo', align: 'left', label: 'CARGO ', field: row=>row.cargo.nombre, sortable: true },
-          { name: 'unit', align: 'left', label: 'UNIDAD ', field: row=>row.unit.nombre, sortable: true },
+          //{ name: 'unit', align: 'left', label: 'UNIDAD ', field: row=>row.unit.nombre, sortable: true },
           { name: 'email', align: 'left', label: 'E-MAIL', field: 'email', sortable: true },
           { name: 'estado', align: 'left', label: 'ESTADO', field: 'state', sortable: true },
           { name: 'permisos', align: 'left', label: 'PERMISOS', field: 'permisos', sortable: true },
@@ -249,8 +249,9 @@
       this.misdatos()
       this.getCargo()
       this.getUnit()
-      this.unit=this.store.unit
-      this.unit.label=this.unit.nombre
+      if(this.store.units.length>0){
+      this.unit=this.store.units[0]
+      this.unit.label=this.units[0].nombre}
       console.log(this.unit)
       this.$api.get('permiso').then(res => {
         res.data.forEach(r => {
@@ -261,7 +262,7 @@
 
     },
     methods: {
-      filterFn (val, update) {
+     /* filterFn (val, update) {
         if (val === '') {
           update(() => {
             this.units = this.filterU
@@ -276,7 +277,7 @@
           const needle = val.toLowerCase()
           this.units = this.filterU.filter(v => v.label.toLowerCase().indexOf(needle) > -1)
         })
-      },
+      },*/
       cambioEstado(user1){
         this.$api.post('cambioEstado/' + user1.id).then(() => {
           this.misdatos()
@@ -305,8 +306,7 @@
       },
 
       regDialog () {
-        this.unit=this.store.unit
-        this.unit.label=this.unit.nombre
+
         this.dato = { fechalimite: (moment(this.fecha).add(12, 'months').format('YYYY-MM-DD')) }
         this.cargo=this.cargos[1]
         this.alert = true
@@ -367,7 +367,6 @@
           fechalimite: this.dato.fechalimite,
           cargo_id:this.cargo.id,
           cargo:this.cargo.nombre,
-          unit_id:this.unit.id,
           permisos: this.permisos
         }).then(() => {
           // console.log(res.data)

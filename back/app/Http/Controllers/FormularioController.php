@@ -135,6 +135,8 @@ class FormularioController extends Controller
         $formulario->codigo=$tramite->codigo.'-'.$unit->codigo.str_pad($request->numero, 6, '0', STR_PAD_LEFT).'/'.substr($gestion,2,2);
         $formulario->codtram=str_pad($request->numero, 4, '0', STR_PAD_LEFT).'/'.substr($gestion,2,2);
         $formulario->distrito=$request->distrito;
+        $formulario->gestorci=$request->gestorci;
+        $formulario->gestornom=$request->gestornom;
         $formulario->detalle=$request->detalle;
         $formulario->observacion=$request->observacion;
         $formulario->estado='PROCESO';
@@ -218,6 +220,8 @@ class FormularioController extends Controller
         $formulario->codigo=$tramite->codigo.'-'.$unit->codigo.str_pad($request->numero, 6, '0', STR_PAD_LEFT).'/'.substr($gestion,2,2);
         $formulario->codtram=str_pad($request->numero, 4, '0', STR_PAD_LEFT).'/'.substr($gestion,2,2);
         $formulario->distrito=$request->distrito;
+        $formulario->gestorci=strtoupper($request->gestorci);
+        $formulario->gestornom=strtoupper($request->gestornom);
         $formulario->detalle=$request->detalle;
         $formulario->observacion=$request->observacion;
         $formulario->estado='PROCESO';
@@ -334,6 +338,10 @@ class FormularioController extends Controller
         $logult->save();
     }
 
+    public function listGestor(){
+        return Formulario::select('gestorci', 'gestornom')->groupBy('gestorci', 'gestornom')->get();
+    }
+
     public function printReq($id){
         $cadena='';
         $formulario  = Formulario::find($id);
@@ -371,7 +379,7 @@ class FormularioController extends Controller
         <table><tr><td>
         <h3 class='titulo'>REQUISITOS TRAMITE:<br>
         ".$tramite->nombre."</h3>
-        <div><b>CODIGO : </b> ".$formulario->codigo."</div>
+        <div><b>CODIGO : </b> ".$formulario->codtram."</div>
         <div><b>CEDULA : </b> ".$propietario->cedula." ".$propietario->complemento."</div>
         <div><b>PROPIETARIO: </b>".$propietario->nombre." ".$propietario->apellido."</div><br>
         <table>".$detalle."</table> <br>

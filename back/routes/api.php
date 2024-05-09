@@ -64,6 +64,7 @@ Route::post('/consprop',[\App\Http\Controllers\FormularioController::class,'cons
         Route::post('/reportAnual2',[\App\Http\Controllers\FormularioController::class,'reportAnual2']);
 
         Route::get('/printReq/{id}',[\App\Http\Controllers\FormularioController::class,'printReq']);
-        Route::get('/printRuta/{id}',[\App\Http\Controllers\FormularioController::class,'printRuta']);
+        Route::get('/printRuta/{id}',[\App\Http\Controllers\FormularioController::class,'printRuta']); 
+        Route::get('/listGestor',[\App\Http\Controllers\FormularioController::class,'listGestor']); 
 
 });

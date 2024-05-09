@@ -5,21 +5,25 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Permiso;
 use App\Models\User;
+use App\Models\Unit;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+
 class UserController extends Controller
 {
     //
 
     public function login(Request $request)
     {
+        //return $request;
         $validated = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
         ]);
-        $user = User::with('permisos')->with('cargo')->with('unit')->where('email', $request->email)->whereDate('fechalimite','>=',date('Y-m-d'))->first();
+        $user = User::where('email', $request->email)->whereDate('fechalimite','>=',date('Y-m-d'))->where('state','ACTIVO')->first();
         if ($user) {
             if (Hash::check($request->password, $user->password)) {
-                $user = User::with('permisos')->with('cargo')->with('unit')->where('email', $request->email)->first();
+                $user = User::with('permisos')->with('cargo')->with('units')->where('email', $request->email)->first();
                 $token = $user->createToken('authToken')->plainTextToken;
                 return response(['user' => $user, 'token' => $token]);
             } else {
@@ -29,11 +33,12 @@ class UserController extends Controller
             return response(['message' => 'Usuario no encontrado'],500);
         }
     }
+
     public function me(Request $request)
     {
-        $user=User::with('permisos')->with('cargo')->with('unit')
+        $user=User::with('permisos')->with('cargo')->with('units')
                     ->where('id',$request->user()->id)
-                    //->where('state','active')
+                    ->where('state','ACTIVO')
                     ->whereDate('fechalimite','>=',date('Y-m-d'))
                     ->firstOrFail();
                 return $user;
@@ -46,18 +51,26 @@ class UserController extends Controller
     }
 
     public function index(){
-        return User::with('permisos')->with('cargo')->with('unit')->where('id','<>',1)->get();
+        return User::with('permisos')->with('cargo')->with('units')->where('id','<>',1)->get();
     }
 
     public function listuser(Request $request){
+
         if($request->user()->unit_id == 24)
-            return User::with('permisos')->with('cargo')->with('unit')->where('id','<>',1)->get();
+            return User::with('permisos')->with('cargo')->with('units')->where('id','<>',1)->get();
         else
-            return User::with('permisos')->with('cargo')->with('unit')->where("unit_id",$request->user()->unit_id)->where('id','<>',1)->get();
+            return User::with('permisos')->with('cargo')->with('units')->where('id','<>',1)->get();
     }
 
     public function listUserUnit(Request $request){
-        return User::with('cargo')->with('unit')->where('state','ACTIVO')->where('unit_id',$request->user()->unit_id)->where('id','<>',1)->get();
+        $listu=DB::SELECT("SELECT unit_id from unit_user where user_id=".$request->user()->id);
+
+        //return User::with('cargo')->with('unit')->where('state','ACTIVO')->where('id','<>',1)->get();
+        return User::with('cargo')->where('state','ACTIVO')->with('units')
+        ->with(['units' => function ($query) use ($listu) {
+            $query->whereIn('id', $listu);
+        }])
+        ->where('id','<>',1)->get();
     }
 
     public function cambioEstado($id){
@@ -80,7 +93,6 @@ class UserController extends Controller
             'password' => 'required',
             'fechalimite' => 'required',
             'cargo_id' => 'required',
-            'unit_id' => 'required',
         ]);
         
         $validated['password']=Hash::make($validated['password']);
@@ -103,8 +115,8 @@ class UserController extends Controller
             'name' => 'required',
             'email' => 'required|email',
             'fechalimite' => 'required',
-            'cargo_id' => 'required',
-            'unit_id' => 'required',
+            'cargo_id' => 'required'
+            
         ]);
         $user->update($validated);
         return response(['user' => $user]);
@@ -128,6 +140,17 @@ class UserController extends Controller
         $permiso = Permiso::find($permisos);
         $user->permisos()->detach();
         $user->permisos()->attach($permiso);
+    }
+
+    public function updateunits(Request $request,User $user){
+        $units= array();
+        foreach ($request->units as $unit){
+            if ($unit['estado']==true)
+                $units[]=$unit['id'];
+        }
+        $unit = Unit::find($units);
+        $user->units()->detach();
+        $user->units()->attach($unit);
     }
 
     public function destroy(User $user)

@@ -14,7 +14,7 @@
         <q-toolbar-title>
           <div class="row">
             <div class="">            <img             src="/logo.png"            style="height: 40px; width: 40px;"      /></div>
-            <div class="">GOBIERNO MUNICIPAL DE ORURO <br><div style="font-size:10px">  {{ store.unit.nombre }} :  {{ store.cargo.nombre }}</div></div>
+            <div class="">GOBIERNO MUNICIPAL DE ORURO <br><div style="font-size:10px">  {{ store.units  }} :  {{ store.cargo.nombre }}</div></div>
 
 
 
@@ -99,7 +99,7 @@
 
 <script >
 import { defineComponent, ref } from 'vue';
-import { globalStore } from '../stores/globalStore'
+import { globalStore } from 'stores/globalStore'
 
 
 export default defineComponent({
@@ -107,13 +107,18 @@ export default defineComponent({
   data () {
     return {
       leftDrawerOpen: ref(false),
-      store: globalStore()
+      store: globalStore(),
+      unidad: ''
     }
+  },
+  mounted(){
+    console.log(this.store.units)
+
   },
   created () {
     if(!this.store.isLoggedIn)
     this.$router.push('/login')
-
+  
   },
   methods: {
     ira(){
@@ -130,7 +135,7 @@ export default defineComponent({
         this.$q.loading.show()
         this.$api.post('logout').then(() => {
           globalStore().user = {}
-          globalStore().unit = {}
+          globalStore().units = []
           globalStore().cargo = {}
           localStorage.removeItem('tokenTerri')
           globalStore().isLoggedIn = false

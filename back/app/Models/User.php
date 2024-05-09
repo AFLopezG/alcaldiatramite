@@ -23,8 +23,7 @@ class User extends Authenticatable
         'email',
         'fechalimite',
         'password',
-        'cargo_id',
-        'unit_id',
+        'cargo_id'
     ];
 
     /**
@@ -50,10 +49,13 @@ class User extends Authenticatable
         return $this->belongsTo(Cargo::class);
     }
 
-    public function unit(){
+    /*public function unit(){
         return $this->belongsTo(Unit::class);
-    }
+    }*/
 
+    public function units(){
+        return $this->belongsToMany(Unit::class);
+    }
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',

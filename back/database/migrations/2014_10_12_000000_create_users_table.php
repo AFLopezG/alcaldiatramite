@@ -22,8 +22,7 @@ return new class extends Migration
             $table->string('password');
             $table->unsignedBigInteger('cargo_id')->nullable();
             $table->foreign('cargo_id')->references('id')->on('cargos');
-            $table->unsignedBigInteger('unit_id')->nullable();
-            $table->foreign('unit_id')->references('id')->on('units');  //1 o varios
+
             $table->rememberToken();
             $table->softDeletes();
             $table->timestamps();

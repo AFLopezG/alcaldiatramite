@@ -12,4 +12,8 @@ class Tramite extends Model
     public function requisitos(){
         return $this->hasMany(Requisito::class);
     }
+
+    public function unit(){
+        return $this->belongsTo(Unit::class);
+    }
 }

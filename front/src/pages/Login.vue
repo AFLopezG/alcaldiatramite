@@ -87,7 +87,8 @@ import {globalStore} from 'stores/globalStore'
     },
     methods: {
       login () {
-        this.loading = true
+
+        this.$q.loading.show()
         this.$api.post('login', {
           email: this.email,
           password: this.password
@@ -98,11 +99,15 @@ import {globalStore} from 'stores/globalStore'
             icon: 'check_circle',
             position: 'top'
           })
-          console.log(res.data)
+         // console.log(res.data)
+		  //return false
           this.store.user = res.data.user
-          this.store.unit = res.data.user.unit
+          this.store.units = ''
           this.store.cargo = res.data.user.cargo
           this.store.isLoggedIn = true
+          res.data.user.units.forEach(r => {
+			this.store.units+=r.nombre+' '
+		  })
           res.data.user.permisos.forEach(r => {
             if (r.id === 1) this.store.booluser = true
             if (r.id === 2) this.store.boolregistro = true
@@ -118,13 +123,13 @@ import {globalStore} from 'stores/globalStore'
         }).catch(error => {
           console.log(error)
           this.$q.notify({
-            message: error.response.data.message,
+            message: error.message,
             color: 'negative',
             position: 'top',
             timeout: 2000
           })
         }).finally(() => {
-          this.loading = false
+          this.$q.loading.hide()
         })
       }
     }

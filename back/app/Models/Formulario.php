@@ -17,6 +17,8 @@ class Formulario extends Model
     'distrito',
     'observacion',
     'habilita',
+    'gestorci',
+    'gestornom',
     'estado',
     'fecha',
     'hora',
@@ -31,7 +33,7 @@ class Formulario extends Model
     }
 
     public function tramite(){
-        return $this->belongsTo(Tramite::class)->with('requisitos');
+        return $this->belongsTo(Tramite::class)->with('requisitos')->with('unit');
     }
 
     public function propietario(){
