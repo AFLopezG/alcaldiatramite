@@ -20,8 +20,8 @@ class UserController extends Controller
             'email' => 'required|email',
             'password' => 'required',
         ]);
-        $user = User::where('email', $request->email)->whereDate('fechalimite','>=',date('Y-m-d'))->where('state','ACTIVO')->first();
-        if ($user) {
+        $user = User::where('email', $request->email)->with('units')->whereDate('fechalimite','>=',date('Y-m-d'))->where('state','ACTIVO')->first();
+        if ($user && sizeof($user->units)>0) {
             if (Hash::check($request->password, $user->password)) {
                 $user = User::with('permisos')->with('cargo')->with('units')->where('email', $request->email)->first();
                 $token = $user->createToken('authToken')->plainTextToken;
@@ -55,21 +55,43 @@ class UserController extends Controller
     }
 
     public function listuser(Request $request){
-
-        if($request->user()->unit_id == 24)
+        $lista = $request->user()->units;
+        $listu=DB::SELECT("SELECT unit_id from unit_user where user_id=".$request->user()->id);
+        $resultado=[];
+        //return $listu;
+            foreach ($listu as  $value) {
+                # code...
+                array_push($resultado,$value->unit_id);
+            }
+        //return $resultado;
+        $valida=false;
+        foreach ($lista as $value) {
+            if($value->id==24)
+                $valida=true;
+        }
+        if($valida)
             return User::with('permisos')->with('cargo')->with('units')->where('id','<>',1)->get();
         else
-            return User::with('permisos')->with('cargo')->with('units')->where('id','<>',1)->get();
+            return User::with('permisos')->with('cargo')->with('units')    
+        ->whereHas('units',function($query) use ($resultado){
+            $query->whereIn('units.id',$resultado);
+        })
+        ->where('id','<>',1)->get();
     }
 
     public function listUserUnit(Request $request){
         $listu=DB::SELECT("SELECT unit_id from unit_user where user_id=".$request->user()->id);
-
+        $resultado=[];
+        //return $listu;
+            foreach ($listu as  $value) {
+                # code...
+                array_push($resultado,$value->unit_id);
+            }
         //return User::with('cargo')->with('unit')->where('state','ACTIVO')->where('id','<>',1)->get();
-        return User::with('cargo')->where('state','ACTIVO')->with('units')
-        ->with(['units' => function ($query) use ($listu) {
-            $query->whereIn('id', $listu);
-        }])
+        return User::with('cargo')->where('state','ACTIVO')    
+        ->whereHas('units',function($query) use ($resultado){
+            $query->whereIn('units.id',$resultado);
+        })
         ->where('id','<>',1)->get();
     }
 

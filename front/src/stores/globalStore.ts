@@ -23,5 +23,6 @@ export const globalStore = defineStore('global', {
     increment () {
       this.counter++
     }
-  }
+  },
+  
 })

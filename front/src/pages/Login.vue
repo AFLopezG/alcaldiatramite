@@ -106,8 +106,9 @@ import {globalStore} from 'stores/globalStore'
           this.store.cargo = res.data.user.cargo
           this.store.isLoggedIn = true
           res.data.user.units.forEach(r => {
-			this.store.units+=r.nombre+' '
+			this.store.units +=r.nombre + ' '
 		  })
+
           res.data.user.permisos.forEach(r => {
             if (r.id === 1) this.store.booluser = true
             if (r.id === 2) this.store.boolregistro = true

@@ -60,6 +60,13 @@
               </ul>
             </q-td>
             </template>
+            <template v-slot:body-cell-units="props">
+            <q-td key="units" :props="props">
+              <ul>
+                <li v-for="(p,i) in props.row.units" :key="i">{{p.nombre}}</li>
+              </ul>
+            </q-td>
+            </template>
             <template v-slot:body-cell-estado="props">
             <q-td key="estado" :props="props">
               <q-badge :color="props.row.state=='ACTIVO'?'green':'red'"  :label="props.row.state" @click="cambioEstado(props.row)" />
@@ -83,6 +90,14 @@
                 color="positive"
                 @click="cambiopass(props)"
                 icon="vpn_key"
+              />
+              <q-btn
+                dense
+                round
+                flat
+                color="blue-10"
+                @click="misunits(props)"
+                icon="category"
               />
               <q-btn
                 dense
@@ -193,6 +208,25 @@
           </q-card-section>
         </q-card>
       </q-dialog>
+
+      <q-dialog v-model="dialogUnit">
+        <q-card style="width: 700px;max-width: 80vw">
+          <q-card-section class="bg-info">
+            <div class="text-h7 text-white"><q-icon name="folder"/> Unidades</div>
+          </q-card-section>
+          <q-card-section>
+            <q-form @submit.prevent="updateUnit">
+              <!--          v-on:click.native="updatepermiso(permiso)"-->
+              <q-checkbox style="width: 100%"  v-for="(unidad,index) in unidades" :key="index" :label="unidad.nombre" v-model="unidad.estado" />
+              <!--          <q-form>-->
+              <!--&lt;!&ndash;            <q-checkbox v-model="permisos" />&ndash;&gt;-->
+              <!--          </q-form>-->
+              <q-btn  type="submit" color="info" icon="send" label="Actualizar"></q-btn>
+            </q-form>
+          </q-card-section>
+        </q-card>
+      </q-dialog>
+
     </div>
   </template>
 
@@ -210,6 +244,7 @@
         dialog_mod: false,
         dialog_del: false,
         typePassword: true,
+        dialogUnit: false,
         fecha: date.formatDate(new Date(), 'YYYY-MM-DD'),
         filter: '',
         dato: { fechalimite: (moment(this.fecha).add(36, 'months').format('YYYY-MM-DD')) },
@@ -217,6 +252,7 @@
         dato2: {},
         options: [],
         props: [],
+        unidad: [],
         unidades: [],
         permisos: [],
         permisos2: [],
@@ -231,7 +267,7 @@
           { name: 'cedula', align: 'left', label: 'CI ', field: 'cedula', sortable: true },
           { name: 'name', align: 'left', label: 'NOMBRE ', field: 'name', sortable: true },
           { name: 'cargo', align: 'left', label: 'CARGO ', field: row=>row.cargo.nombre, sortable: true },
-          //{ name: 'unit', align: 'left', label: 'UNIDAD ', field: row=>row.unit.nombre, sortable: true },
+          { name: 'units', align: 'left', label: 'UNIDADES ', field: 'units', sortable: true },
           { name: 'email', align: 'left', label: 'E-MAIL', field: 'email', sortable: true },
           { name: 'estado', align: 'left', label: 'ESTADO', field: 'state', sortable: true },
           { name: 'permisos', align: 'left', label: 'PERMISOS', field: 'permisos', sortable: true },
@@ -250,13 +286,18 @@
       this.getCargo()
       this.getUnit()
       if(this.store.units.length>0){
-      this.unit=this.store.units[0]
-      this.unit.label=this.units[0].nombre}
+      this.unit=this.store.user.units[0]
+      this.unit.label=this.unit.nombre}
       console.log(this.unit)
       this.$api.get('permiso').then(res => {
         res.data.forEach(r => {
           this.permisos.push({ id: r.id, nombre: r.nombre, estado: false })
           this.permisos2.push({ id: r.id, nombre: r.nombre, estado: false })
+        })
+      })
+      this.$api.get('unit').then(res => {
+        res.data.forEach(r => {
+          this.unidades.push({ id: r.id, nombre: r.nombre, estado: false })
         })
       })
 
@@ -325,6 +366,19 @@
           })
         })
       },
+      updateUnit () {
+        this.$api.put('updateunits/' + this.dato2.id, { units: this.unidades }).then(() => {
+          // console.log(res.data)
+          this.dialogUnit = false
+          this.misdatos()
+        }).catch(err => {
+          this.$q.notify({
+            message: err.response.data.message,
+            icon: 'close',
+            color: 'red'
+          })
+        })
+      },
       mispermisos (i) {
         // console.log(i.row)
         this.modelpermiso = true
@@ -338,6 +392,21 @@
           // console.log(p)
         })
       },
+
+      misunits (i) {
+        // console.log(i.row)
+        this.dialogUnit = true
+        this.dato2 = i.row
+        let p
+        this.unidades.forEach(pe => {
+          // console.log(pe);
+          p = this.dato2.units.find(r => r.pivot.unit_id === pe.id)
+          // console.log(p)
+          if (p !== undefined) { pe.estado = true } else { pe.estado = false }
+          // console.log(p)
+        })
+      },
+
       misdatos () {
         this.$q.loading.show()
         this.$api.post('listuser').then((res) => {

@@ -28,13 +28,14 @@ export default boot(({ app, router }) => {
     api.post('me').then((response) => {
       console.log(response.data)
       globalStore().user = response.data
-      globalStore().units = ''
+      globalStore().units = '' 
       globalStore().cargo = response.data.cargo
       globalStore().isLoggedIn = true
-      response.data.units.forEach( (r: { nombre: Text }) => {
-        globalStore().units+= r.nombre +' '
-      })
-        response.data.permisos.forEach( (r: { id: number }) => {
+
+    response.data.units.forEach( (r: { nombre: string }) => {
+      globalStore().units += r.nombre
+    })
+          response.data.permisos.forEach( (r: { id: number }) => {
           if(r.id==1) globalStore().booluser=true
           if(r.id==2) globalStore().boolregistro=true
           if(r.id==3) globalStore().boolasignacion=true

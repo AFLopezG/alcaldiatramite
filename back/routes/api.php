@@ -27,6 +27,7 @@ Route::post('/consprop',[\App\Http\Controllers\FormularioController::class,'cons
         Route::apiResource('user', App\Http\Controllers\UserController::class);
         Route::put('/updatePassword/{user}',[\App\Http\Controllers\UserController::class,'updatePassword']);
         Route::put('/updatepermisos/{user}',[\App\Http\Controllers\UserController::class,'updatepermisos']);
+        Route::put('/updateunits/{user}',[\App\Http\Controllers\UserController::class,'updateunits']);
         Route::resource('/permiso',\App\Http\Controllers\PermisoController::class);
         Route::post('/cambioEstado/{id}',[\App\Http\Controllers\UserController::class,'cambioEstado']);
 

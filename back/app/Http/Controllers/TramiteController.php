@@ -6,6 +6,7 @@ use App\Models\Tramite;
 use App\Http\Requests\StoreTramiteRequest;
 use App\Http\Requests\UpdateTramiteRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TramiteController extends Controller
 {
@@ -19,7 +20,14 @@ class TramiteController extends Controller
     }
 
     public function unitTramite(Request $request){
-        return Tramite::where('estado','ACTIVO')->where('unit_id',$request->user()->unit_id)->get();
+        $listu=DB::SELECT("SELECT unit_id from unit_user where user_id=".$request->user()->id);
+        $resultado=[];
+        //return $listu;
+            foreach ($listu as  $value) {
+                # code...
+                array_push($resultado,$value->unit_id);
+            }
+        return Tramite::where('estado','ACTIVO')->whereIN('unit_id',$resultado)->get();
     }
 
     /**
