@@ -428,7 +428,7 @@ class FormularioController extends Controller
         FROM formularios f inner join logs l on f.id=l.formulario_id
         INNER join propietarios p on f.propietario_id=p.id
         inner join tramites t on t.id=f.tramite_id
-        where l.fecha='$request->fecha' and l.user_id2=".$request->user()->id." and f.unit_id=".$request->user()->unit_id." 
+        where l.fecha='$request->fecha' and l.user_id2=".$request->user()->id." 
         group by f.codtram,tramite,p.nombre,p.apellido
         order by t.nombre;");
 
@@ -439,7 +439,7 @@ class FormularioController extends Controller
         FROM formularios f inner join logs l on f.id=l.formulario_id
         INNER join propietarios p on f.propietario_id=p.id
         inner join tramites t on t.id=f.tramite_id
-        where l.fecha='$request->fecha' and l.user_id=".$request->user()->id." and f.unit_id=".$request->user()->unit_id." 
+        where l.fecha='$request->fecha' and l.user_id=".$request->user()->id." 
         group by f.codtram,tramite,p.nombre,p.apellido
         order by t.nombre;");
      }
@@ -449,7 +449,7 @@ class FormularioController extends Controller
         from logs
         where formulario_id in (SELECT l2.formulario_id 
                     from logs l2 inner join formularios f on f.id=l2.formulario_id
-                    where l2.user_id2=".$request->user()->id." and f.unit_id=".$request->user()->unit_id."
+                    where l2.user_id2=".$request->user()->id." 
                      and f.deleted_at is null )
         
         GROUP by formulario_id order by id desc");
@@ -477,7 +477,7 @@ class FormularioController extends Controller
         where f.id in (select l.formulario_id from logs l 
                         where l.fecha>='$request->fecha1' and l.fecha<='$request->fecha2'
                         and l.user_id2=".$request->user()->id." GROUP by l.formulario_id) 
-        and f.unit_id = ".$request->user()->unit_id."
+        
         group BY t.nombre;");
      }
 
@@ -500,7 +500,6 @@ class FormularioController extends Controller
         return Formulario::where('gestion',$request->gestion)
         ->where('numero',$request->numero)
         ->where('tramite_id',$request->tramite_id)
-        ->where('unit_id',$request->user()->unit_id)
         ->whereNull('deleted_at')
         ->with('propietario')->with('tramite')->get();
     }
@@ -522,7 +521,7 @@ class FormularioController extends Controller
         INNER join propietarios p on f.propietario_id=p.id
         inner join tramites t on t.id=f.tramite_id
         where l.fecha>='$request->ini' and l.fecha<='$request->fin' 
-        and l.user_id=".$request->user()->id." and f.unit_id = ".$request->user()->unit_id."
+        and l.user_id=".$request->user()->id." 
         and f.estado='FINALIZADO' group by f.codtram,tramite,p.nombre,p.apellido
         order by t.nombre;");
      }
