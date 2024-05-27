@@ -18,7 +18,7 @@ class Tramite extends Model
 
 
     public function requisitos(){
-        return $this->hasMany(Requisito::class);
+        return $this->belongsToMany(Requisito::class);
     }
 
     public function unit(){
@@ -26,6 +26,6 @@ class Tramite extends Model
     }
 
     public function procesos(){
-        return $this->hasMany(Proceso::class);
+        return $this->belongsToMany(Proceso::class);
     }
 }

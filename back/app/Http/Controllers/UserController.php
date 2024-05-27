@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Permiso;
 use App\Models\User;
 use App\Models\Unit;
+use App\Models\Profile;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
@@ -172,7 +173,7 @@ class UserController extends Controller
             if ($profile['estado']==true)
                 $profiles[]=$profile['id'];
         }
-        $profile = Permiso::find($profiles);
+        $profile = Profile::find($profiles);
         $user->profiles()->detach();
         $user->profiles()->attach($profile);
     }

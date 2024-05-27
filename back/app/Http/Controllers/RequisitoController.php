@@ -30,7 +30,10 @@ class RequisitoController extends Controller
      */
     public function store(StoreRequisitoRequest $request)
     {
-        //
+        //  
+        $requisito=new Requisito();
+        $requisito->detalle=$request->detalle;
+        $requisito->save();
     }
 
     /**
@@ -55,13 +58,18 @@ class RequisitoController extends Controller
     public function update(UpdateRequisitoRequest $request, Requisito $requisito)
     {
         //
+        $requisito=Requisito::find($request->id);
+        $requisito->detalle=$request->detalle;
+        $requisito->save();
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Requisito $requisito)
+    public function destroy($id)
     {
         //
+        $requisito=Requisito::find($id);
+        $requisito->delete();
     }
 }

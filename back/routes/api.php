@@ -46,7 +46,6 @@ Route::post('/consprop',[\App\Http\Controllers\FormularioController::class,'cons
         Route::post('/unitTramite',[\App\Http\Controllers\TramiteController::class,'unitTramite']); 
         Route::post('/listForm2',[\App\Http\Controllers\FormularioController::class,'listForm2']);
         
-
         Route::post('/micorreo',[\App\Http\Controllers\FormularioController::class,'micorreo']);
         Route::post('/searchProp',[\App\Http\Controllers\PropietarioController::class,'searchProp']);
         Route::post('/listuser',[\App\Http\Controllers\UserController::class,'listuser']);
@@ -72,5 +71,7 @@ Route::post('/consprop',[\App\Http\Controllers\FormularioController::class,'cons
         Route::get('/printRuta/{id}',[\App\Http\Controllers\FormularioController::class,'printRuta']); 
         Route::get('/listGestor',[\App\Http\Controllers\FormularioController::class,'listGestor']); 
         Route::post('/reasignar',[\App\Http\Controllers\LogController::class,'reasignar']); 
+        
+        Route::put('/upPerfilProc/{proceso}',[\App\Http\Controllers\ProcesoController::class,'upPerfilProc']);
         
 });

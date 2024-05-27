@@ -18,7 +18,7 @@ class TramiteController extends Controller
     public function index()
     {
         //
-        return Tramite::with('unit')->with('requisitos')->get();
+        return Tramite::with('unit')->with('requisitos')->with('procesos')->get();
     }
 
     public function unitTramite(Request $request){
