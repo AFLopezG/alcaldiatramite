@@ -7,6 +7,9 @@ import Asignacion from 'pages/Asignacion.vue'
 import Seguimiento from 'pages/Seguimiento.vue'
 import Reporte from 'pages/Reporte.vue'
 import Consulta from 'pages/Consulta.vue'
+import Perfiles from 'pages/Perfiles.vue'
+import Unidades from 'pages/Unidades.vue'
+import Tramites from 'pages/Tramites.vue'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -14,7 +17,10 @@ const routes: RouteRecordRaw[] = [
     component: MainLayout,
     children: [
       { path: '', component: IndexPage, meta: { requiresAuth: true } },
+      { path: '/perfiles', component: Perfiles, meta: { requiresAuth: true } },
+      { path: '/unidades', component: Unidades, meta: { requiresAuth: true } },
       { path: '/usuarios', component: Usuarios, meta: { requiresAuth: true } },
+      { path: '/tramites', component: Tramites, meta: { requiresAuth: true } },
       { path: '/asignacion/:tipoasignacion', component: Asignacion, meta: { requiresAuth: true } },
       { path: '/seguimiento', component: Seguimiento, meta: { requiresAuth: true } },
       { path: '/reporte', component: Reporte, meta: { requiresAuth: true } },

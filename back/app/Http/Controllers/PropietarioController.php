@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Propietario;
 use App\Http\Requests\StorePropietarioRequest;
 use App\Http\Requests\UpdatePropietarioRequest;
+use App\Models\Profile;
 use Illuminate\Http\Request;
 
 class PropietarioController extends Controller

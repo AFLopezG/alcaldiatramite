@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Requisito;
-use App\Http\Requests\StoreRequisitoRequest;
-use App\Http\Requests\UpdateRequisitoRequest;
+use App\Models\ProfileTramite;
+use App\Http\Requests\StoreProfileTramiteRequest;
+use App\Http\Requests\UpdateProfileTramiteRequest;
 
-class RequisitoController extends Controller
+class ProfileTramiteController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -14,7 +14,6 @@ class RequisitoController extends Controller
     public function index()
     {
         //
-        return Requisito::all();
     }
 
     /**
@@ -28,7 +27,7 @@ class RequisitoController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreRequisitoRequest $request)
+    public function store(StoreProfileTramiteRequest $request)
     {
         //
     }
@@ -36,7 +35,7 @@ class RequisitoController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Requisito $requisito)
+    public function show(ProfileTramite $profileTramite)
     {
         //
     }
@@ -44,7 +43,7 @@ class RequisitoController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Requisito $requisito)
+    public function edit(ProfileTramite $profileTramite)
     {
         //
     }
@@ -52,7 +51,7 @@ class RequisitoController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateRequisitoRequest $request, Requisito $requisito)
+    public function update(UpdateProfileTramiteRequest $request, ProfileTramite $profileTramite)
     {
         //
     }
@@ -60,7 +59,7 @@ class RequisitoController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Requisito $requisito)
+    public function destroy(ProfileTramite $profileTramite)
     {
         //
     }

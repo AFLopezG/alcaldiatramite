@@ -8,6 +8,8 @@ use App\Models\User;
 use App\Models\Unit;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Response;
+
 
 class UserController extends Controller
 {
@@ -51,7 +53,7 @@ class UserController extends Controller
     }
 
     public function index(){
-        return User::with('permisos')->with('cargo')->with('units')->where('id','<>',1)->get();
+        return User::with('permisos')->with('cargo')->with('units')->with('profiles')->where('id','<>',1)->get();
     }
 
     public function listuser(Request $request){
@@ -70,9 +72,9 @@ class UserController extends Controller
                 $valida=true;
         }
         if($valida)
-            return User::with('permisos')->with('cargo')->with('units')->where('id','<>',1)->get();
+            return User::with('permisos')->with('cargo')->with('units')->with('profiles')->where('id','<>',1)->get();
         else
-            return User::with('permisos')->with('cargo')->with('units')    
+            return User::with('permisos')->with('cargo')->with('units')->with('profiles')
         ->whereHas('units',function($query) use ($resultado){
             $query->whereIn('units.id',$resultado);
         })
@@ -162,6 +164,17 @@ class UserController extends Controller
         $permiso = Permiso::find($permisos);
         $user->permisos()->detach();
         $user->permisos()->attach($permiso);
+    }
+
+    public function updateperfil(Request $request,User $user){
+        $profiles= array();
+        foreach ($request->perfiles as $profile){
+            if ($profile['estado']==true)
+                $profiles[]=$profile['id'];
+        }
+        $profile = Permiso::find($profiles);
+        $user->profiles()->detach();
+        $user->profiles()->attach($profile);
     }
 
     public function updateunits(Request $request,User $user){

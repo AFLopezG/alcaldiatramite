@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Requisito;
-use App\Http\Requests\StoreRequisitoRequest;
-use App\Http\Requests\UpdateRequisitoRequest;
+use App\Models\Proceso;
+use App\Http\Requests\StoreProcesoRequest;
+use App\Http\Requests\UpdateProcesoRequest;
 
-class RequisitoController extends Controller
+class ProcesoController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -14,7 +14,7 @@ class RequisitoController extends Controller
     public function index()
     {
         //
-        return Requisito::all();
+        return Proceso::all();
     }
 
     /**
@@ -28,7 +28,7 @@ class RequisitoController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreRequisitoRequest $request)
+    public function store(StoreProcesoRequest $request)
     {
         //
     }
@@ -36,7 +36,7 @@ class RequisitoController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Requisito $requisito)
+    public function show(Proceso $proceso)
     {
         //
     }
@@ -44,7 +44,7 @@ class RequisitoController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Requisito $requisito)
+    public function edit(Proceso $proceso)
     {
         //
     }
@@ -52,7 +52,7 @@ class RequisitoController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateRequisitoRequest $request, Requisito $requisito)
+    public function update(UpdateProcesoRequest $request, Proceso $proceso)
     {
         //
     }
@@ -60,7 +60,7 @@ class RequisitoController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Requisito $requisito)
+    public function destroy(Proceso $proceso)
     {
         //
     }

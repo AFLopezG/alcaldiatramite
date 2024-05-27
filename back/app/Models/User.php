@@ -45,6 +45,10 @@ class User extends Authenticatable
         return $this->belongsToMany(Permiso::class);
     }
 
+    public function profiles(){
+        return $this->belongsToMany(Profile::class);
+    }
+
     public function cargo(){
         return $this->belongsTo(Cargo::class);
     }

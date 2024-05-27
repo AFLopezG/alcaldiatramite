@@ -27,6 +27,7 @@ Route::post('/consprop',[\App\Http\Controllers\FormularioController::class,'cons
         Route::apiResource('user', App\Http\Controllers\UserController::class);
         Route::put('/updatePassword/{user}',[\App\Http\Controllers\UserController::class,'updatePassword']);
         Route::put('/updatepermisos/{user}',[\App\Http\Controllers\UserController::class,'updatepermisos']);
+        Route::put('/updateperfil/{user}',[\App\Http\Controllers\UserController::class,'updateperfil']);
         Route::put('/updateunits/{user}',[\App\Http\Controllers\UserController::class,'updateunits']);
         Route::resource('/permiso',\App\Http\Controllers\PermisoController::class);
         Route::post('/cambioEstado/{id}',[\App\Http\Controllers\UserController::class,'cambioEstado']);
@@ -34,11 +35,14 @@ Route::post('/consprop',[\App\Http\Controllers\FormularioController::class,'cons
         Route::apiResource('permiso', App\Http\Controllers\PermisoController::class);
         Route::apiResource('cargo', App\Http\Controllers\CargoController::class);
         Route::apiResource('unit', App\Http\Controllers\UnitController::class);
+        Route::apiResource('requisito', App\Http\Controllers\RequisitoController::class);
+        Route::apiResource('proceso', App\Http\Controllers\ProcesoController::class);
 
         Route::resource('/cargo',\App\Http\Controllers\CargoController::class);
         Route::resource('/tramite',\App\Http\Controllers\TramiteController::class);
         Route::resource('/formulario',\App\Http\Controllers\FormularioController::class);
         Route::resource('/log',\App\Http\Controllers\LogController::class);
+        Route::resource('/profile',\App\Http\Controllers\ProfileController::class);
         Route::post('/unitTramite',[\App\Http\Controllers\TramiteController::class,'unitTramite']); 
         Route::post('/listForm2',[\App\Http\Controllers\FormularioController::class,'listForm2']);
         
@@ -67,5 +71,6 @@ Route::post('/consprop',[\App\Http\Controllers\FormularioController::class,'cons
         Route::get('/printReq/{id}',[\App\Http\Controllers\FormularioController::class,'printReq']);
         Route::get('/printRuta/{id}',[\App\Http\Controllers\FormularioController::class,'printRuta']); 
         Route::get('/listGestor',[\App\Http\Controllers\FormularioController::class,'listGestor']); 
-
+        Route::post('/reasignar',[\App\Http\Controllers\LogController::class,'reasignar']); 
+        
 });

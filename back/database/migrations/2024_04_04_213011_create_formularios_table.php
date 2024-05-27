@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('formularios', function (Blueprint $table) {
             $table->id();
+            //numeroi de contacto
             $table->integer('numero');
             $table->string('gestion');
             $table->string('codigo');

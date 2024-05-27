@@ -25,6 +25,8 @@ class DatabaseSeeder extends Seeder
             PermisoSeeder::class,
             TramiteSeeder::class,
             RequisitoSeeder::class,
+            EstadoSeeder::class,
+            ProfileSeeder::class,
         ]);
     }
 }

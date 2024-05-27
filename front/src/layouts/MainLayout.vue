@@ -49,6 +49,9 @@
           <q-item-section avatar><q-icon name="home" /></q-item-section>
           <q-item-section><q-item-label>Principal</q-item-label><q-item-label caption class="text-grey-2"></q-item-label></q-item-section>
       </q-item>
+      <q-expansion-item  active-class="bg-primary text-white" dense exact expand-separator icon="account_balance" label="Unidades" to="/unidades" expand-icon="null" v-if="store.booluser"/>
+      <q-expansion-item  active-class="bg-primary text-white" dense exact expand-separator icon="badge" label="Perfiles" to="/perfiles" expand-icon="null" v-if="store.booluser"/>
+      <q-expansion-item  active-class="bg-primary text-white" dense exact expand-separator icon="developer_board" label="Tramites" to="/tramites" expand-icon="null" v-if="store.booluser"/>
       <q-expansion-item  active-class="bg-primary text-white" dense exact expand-separator icon="people" label="Usuarios" to="/usuarios" expand-icon="null" v-if="store.booluser"/>
       <q-expansion-item
             expand-separator
@@ -86,7 +89,7 @@
 
           </q-expansion-item>
         <q-expansion-item  active-class="bg-primary text-white" dense exact expand-separator icon="route" label="Buscar Tramite" to="/seguimiento" expand-icon="null" v-if="store.boolseg"/>
-        <q-expansion-item  active-class="bg-primary text-white" dense exact expand-separator icon="summarize" label="Reporte Dia" to="/reporte" expand-icon="null" />
+        <q-expansion-item  active-class="bg-primary text-white" dense exact expand-separator icon="summarize" label="Reporte Dia" to="/reporte" expand-icon="null" v-if="store.boolreporte"/>
         <q-expansion-item  active-class="bg-primary text-white" dense exact expand-separator icon="event_available" label="Reporte Anual" to="/reporteAnual" expand-icon="null" v-if="store.boolanual"/>
       </q-list>
     </q-drawer>

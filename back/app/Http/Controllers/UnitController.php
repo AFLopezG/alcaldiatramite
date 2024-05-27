@@ -31,6 +31,14 @@ class UnitController extends Controller
     public function store(StoreUnitRequest $request)
     {
         //
+        $request->validate([
+            'nombre' => 'required',
+            'codigo' => 'required|unique:units'
+        ]);
+        $unit =new Unit();
+        $unit->nombre=strtoupper($request->nombre);
+        $unit->codigo=strtoupper($request->codigo);
+        $unit->save();
     }
 
     /**
@@ -55,13 +63,24 @@ class UnitController extends Controller
     public function update(UpdateUnitRequest $request, Unit $unit)
     {
         //
+        $request->validate([
+            'nombre' => 'required',
+            'codigo' => 'required|unique:units'.$request->id
+        ]);
+        $unit = Unit::find($request->id);
+        $unit->nombre=strtoupper($request->nombre);
+        $unit->codigo=strtoupper($request->codigo);
+        $unit->save();
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Unit $unit)
+    public function destroy($id)
     {
         //
+        $unit = Unit::find($id);
+        $unit->delete();
+
     }
 }

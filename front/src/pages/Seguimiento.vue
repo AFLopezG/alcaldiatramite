@@ -28,6 +28,7 @@
             <q-td key="op" :props="props">
                 <q-btn color="info" icon="visibility" size="xs" @click="conLog(props.row)"  />
                 <q-btn color="red" icon="delete" size="xs" @click="eliminar(props.row)" v-if="store.booldelete"/>
+                <q-btn color="blue" icon="change_circle" size="xs" @click="cambiarUser(props.row)" v-if="store.boolcambio"/>
             </q-td>
 
         </template>
@@ -62,6 +63,41 @@
           </q-table>
         </div>
       </div>
+      <q-dialog  v-model="dialogremitir">
+            <q-card style="width: 70%; max-width: 80vw;">
+              <q-card-section>
+                <div class="text-h6"> <q-icon name="outgoing_mail"/> {{ formulario1.codtram }} {{ formulario1.tramite.nombre }} Derivar</div>
+              </q-card-section>
+              <q-card-section class="q-pt-none">
+                <q-form @submit.prevent="registrarlog">
+  <!--                <q-select :options="usuarios" label="Seleccionar personal" v-model="usuario" outlined required/>-->
+                    <div class="row">
+                          <div class="col-12 q-pa-xs">
+                            <q-select class="col-8" dense use-input :options="usuarios" label="Seleccionar personal" v-model="usuario" @filter="filterFn" outlined>
+                              <template v-slot:no-option>
+                                <q-item>
+                                  <q-item-section class="text-grey">
+                                    Sin resultados
+                                  </q-item-section>
+                                </q-item>
+                              </template>
+                              <template v-slot:append>
+                                <q-icon name="close" @click.stop.prevent="usuario = ''" class="cursor-pointer" />
+                              </template>
+                            </q-select>
+                          </div>
+                        </div>
+
+
+                  <q-btn label="Cambiar Usuario" color="teal" icon="send" class="full-width" type="submit"/>
+                </q-form>
+              </q-card-section>
+              <q-card-section align="right">
+                <q-btn flat label="Cancelar" color="primary" icon="delete" v-close-popup />
+
+              </q-card-section>
+            </q-card>
+          </q-dialog>
     </q-page>
   </template>
   <script>
@@ -72,12 +108,16 @@ export default {
     data(){
       return {
         buscar: {'gestion':date.formatDate(Date.now(),'YYYY')},
+        formulario1:{},
         propietario:{},
         tramites:[],
+        dialogremitir:false,
         tramite:{label:''},
         filter:'',
         filter2:'',
-        usuario:'',
+        usuario:{label:''},
+        usuarios:[],
+        usuarios2:[],
         formularios:[],
         store: globalStore(),
         colForm:[
@@ -104,8 +144,59 @@ export default {
     },
     created() {
       this.getTramites()
+      this.getUser()
     },
     methods:{
+      filterFn (val, update) {
+        if (val === '') {
+          update(() => {
+            this.usuarios = this.usuarios2
+
+            // here you have access to "ref" which
+            // is the Vue reference of the QSelect
+          })
+          return
+        }
+
+        update(() => {
+          const needle = val.toLowerCase()
+          this.usuarios = this.usuarios2.filter(v => v.label.toLowerCase().indexOf(needle) > -1)
+        })
+      },
+
+      registrarlog(){
+        if(this.usuario.id==undefined)
+          return false
+        this.$api.post('reasignar',{formulario_id:this.formulario1.id,user_id:this.usuario.id}).then((res) => {
+          console.log(res.data)
+          this.dialogremitir=false
+          this.usuario={label:''}
+          this.conLog(this.formulario1)
+
+        })
+      },
+      getUser(){
+        this.usuarios=[]
+        this.$api.post('listuser').then((res) => {
+          res.data.forEach(r => {
+            r.label=r.cargo.nombre + ' ' + r.name
+            this.usuarios.push(r)
+          })
+          this.usuarios2=this.usuarios
+        })
+
+      },
+      cambiarUser(dato){
+        this.formulario1=dato
+        this.dialogremitir=true
+      },
+      envarCambio(){
+        if(this.usuario.id==undefined)
+          return false
+        this.$api.post('reasignar',{id:dato.id,user_id:this.usuario.id}).then((res) => {
+          console.log(res.data)
+        })
+      },
       eliminar(formulario ){
         this.$q.dialog({
         title: 'CONFIRMAR',

@@ -124,7 +124,7 @@ import {globalStore} from 'stores/globalStore'
         }).catch(error => {
           console.log(error)
           this.$q.notify({
-            message: error.message,
+            message: error.response.data.message,
             color: 'negative',
             position: 'top',
             timeout: 2000

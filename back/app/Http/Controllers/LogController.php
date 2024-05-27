@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Http\Request;
 
 use App\Models\Log;
 use App\Models\User;
@@ -47,6 +48,15 @@ class LogController extends Controller
         $formulario=Formulario::find($request->formulario_id);
         $formulario->estado='PROCESO';
         $formulario->save();
+    }
+
+    public function reasignar(Request $request){
+        //$formulario=Formulario::find($request->id);
+
+        $log=Log::where('formulario_id',$request->formulario_id)->orderBy('id','desc')->first();
+        $log->user_id2=$request->user_id;
+        $log->save();
+
     }
 
     /**

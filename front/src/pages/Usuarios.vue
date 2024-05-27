@@ -75,46 +75,12 @@
             <template v-slot:body-cell-opcion="props">
 
             <q-td key="opcion" :props="props">
-              <q-btn
-                dense
-                round
-                flat
-                color="yellow"
-                @click="editRow(props)"
-                icon="edit"
-              />
-              <q-btn
-                dense
-                round
-                flat
-                color="positive"
-                @click="cambiopass(props)"
-                icon="vpn_key"
-              />
-              <q-btn
-                dense
-                round
-                flat
-                color="blue-10"
-                @click="misunits(props)"
-                icon="category"
-              />
-              <q-btn
-                dense
-                round
-                flat
-                color="green-10"
-                @click="mispermisos(props)"
-                icon="post_add"
-              />
-              <q-btn
-                dense
-                round
-                flat
-                color="red"
-                @click="deleteRow(props)"
-                icon="delete"
-              ></q-btn>
+              <q-btn dense round flat color="yellow" @click="editRow(props)" icon="edit" />
+              <q-btn dense round flat color="positive" @click="cambiopass(props)" icon="vpn_key" />
+              <q-btn dense round flat color="blue-10" @click="misunits(props)" icon="category" />
+              <q-btn dense round flat color="green-10" @click="mispermisos(props)" icon="post_add" />
+              <q-btn dense round flat color="orange-7" @click="misperfiles(props)" icon="group_add" />
+              <q-btn dense round flat color="red" @click="deleteRow(props)" icon="delete"></q-btn>
             </q-td>
 
         </template>
@@ -209,6 +175,24 @@
         </q-card>
       </q-dialog>
 
+      <q-dialog v-model="dialogPerfil">
+        <q-card style="width: 700px;max-width: 80vw">
+          <q-card-section class="bg-info">
+            <div class="text-h7 text-white"><q-icon name="folder"/> PERFILES DE USUARIO</div>
+          </q-card-section>
+          <q-card-section>
+            <q-form @submit.prevent="updateperfil">
+              <!--          v-on:click.native="updatepermiso(permiso)"-->
+              <q-checkbox style="width: 100%"  v-for="(perfil,index) in perfiles" :key="index" :label="perfil.prof" v-model="perfil.estado" />
+              <!--          <q-form>-->
+              <!--&lt;!&ndash;            <q-checkbox v-model="permisos" />&ndash;&gt;-->
+              <!--          </q-form>-->
+              <q-btn  type="submit" color="info" icon="send" label="Actualizar"></q-btn>
+            </q-form>
+          </q-card-section>
+        </q-card>
+      </q-dialog>
+
       <q-dialog v-model="dialogUnit">
         <q-card style="width: 700px;max-width: 80vw">
           <q-card-section class="bg-info">
@@ -240,6 +224,7 @@
     data () {
       return {
         store:globalStore(),
+        dialogPerfil:false,
         alert: false,
         dialog_mod: false,
         dialog_del: false,
@@ -263,6 +248,7 @@
         filterU:[],
         cargo:{},
         uni: {},
+        perfiles:[],
         columns: [
           { name: 'cedula', align: 'left', label: 'CI ', field: 'cedula', sortable: true },
           { name: 'name', align: 'left', label: 'NOMBRE ', field: 'name', sortable: true },
@@ -285,6 +271,7 @@
       this.misdatos()
       this.getCargo()
       this.getUnit()
+      this.getProfile()
       if(this.store.units.length>0){
       this.unit=this.store.user.units[0]
       this.unit.label=this.unit.nombre}
@@ -303,6 +290,17 @@
 
     },
     methods: {
+      getProfile(){
+        this.$q.loading.show()
+        this.$api.get('profile').then(res => {
+          this.perfiles=[]
+          res.data.forEach(r => {
+            r.estado=false
+            this.perfiles.push(r)
+          });
+        this.$q.loading.hide()
+      })
+        },
      /* filterFn (val, update) {
         if (val === '') {
           update(() => {
@@ -366,6 +364,19 @@
           })
         })
       },
+      updateperfil(){
+        this.$api.put('updateperfil/' + this.dato2.id,  {perfiles:this.perfiles}).then(() => {
+          // console.log(res.data)
+          this.dialogPerfil = false
+          this.misdatos()
+        }).catch(err => {
+          this.$q.notify({
+            message: err.response.data.message,
+            icon: 'close',
+            color: 'red'
+          })
+        })
+      },
       updateUnit () {
         this.$api.put('updateunits/' + this.dato2.id, { units: this.unidades }).then(() => {
           // console.log(res.data)
@@ -387,6 +398,19 @@
         this.permisos2.forEach(pe => {
           // console.log(pe);
           p = this.dato2.permisos.find(r => r.pivot.permiso_id === pe.id)
+          // console.log(p)
+          if (p !== undefined) { pe.estado = true } else { pe.estado = false }
+          // console.log(p)
+        })
+      },
+      misperfiles (i) {
+        // console.log(i.row)
+        this.dialogPerfil = true
+        this.dato2 = i.row
+        let p
+        this.perfiles.forEach(pe => {
+          // console.log(pe);
+          p = this.dato2.profiles.find(r => r.pivot.profile_id === pe.id)
           // console.log(p)
           if (p !== undefined) { pe.estado = true } else { pe.estado = false }
           // console.log(p)

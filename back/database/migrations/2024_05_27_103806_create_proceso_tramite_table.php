@@ -11,9 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('requisitos', function (Blueprint $table) {
+        Schema::create('proceso_tramite', function (Blueprint $table) {
             $table->id();
-            $table->text('detalle');
+            $table->unsignedBigInteger('proceso_id')->nullable();
+            $table->foreign('proceso_id')->references('id')->on('procesos');
+            $table->unsignedBigInteger('tramite_id')->nullable();
+            $table->foreign('tramite_id')->references('id')->on('tramites');
             $table->timestamps();
         });
     }
@@ -23,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('requisitos');
+        Schema::dropIfExists('proceso_tramite');
     }
 };
