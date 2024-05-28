@@ -18,7 +18,7 @@ class TramiteController extends Controller
     public function index()
     {
         //
-        return Tramite::with('unit')->with('requisitos')->with('procesos')->get();
+        return Tramite::with('unit')->get();
     }
 
     public function unitTramite(Request $request){
@@ -65,6 +65,30 @@ class TramiteController extends Controller
         $tramite->requisitos()->attach($requisito);
     }
 
+    public function agregarRequisito(Request $request ){
+        $valida = DB::SELECT("SELECT * from requisito_tramite where requisito_id=$request->requisito_id and tramite_id=$request->tramite_id");
+        if(sizeof($valida)==0)
+        {
+            DB::SELECT("INSERT INTO requisito_tramite  (requisito_id,tramite_id) values ($request->requisito_id, $request->tramite_id)");
+        }
+    }
+
+    public function agregarProceso(Request $request ){
+        $valida = DB::SELECT("SELECT * from proceso_tramite where proceso_id=$request->proceso_id and tramite_id=$request->tramite_id");
+        if(sizeof($valida)==0)
+        {
+            DB::SELECT("INSERT INTO proceso_tramite  (proceso_id,tramite_id) values ($request->proceso_id, $request->tramite_id)");
+        }
+    }
+
+    public function retirarRequisito(Request $request){
+        return DB::SELECT("DELETE FROM requisito_tramite where requisito_id=$request->requisito_id and tramite_id=$request->tramite_id");
+    }
+
+    public function retirarProceso(Request $request){
+        return DB::SELECT("DELETE FROM proceso_tramite where proceso_id=$request->proceso_id and tramite_id=$request->tramite_id");
+    }
+
     public function updateprocesos(Request $request,Tramite $tramite){
         $procesos= array();
         foreach ($request->procesos as $proceso){
@@ -78,9 +102,11 @@ class TramiteController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Tramite $tramite)
+    public function show($id)
     {
         //
+        return Tramite::with('requisitos')->with('procesos')->where('id',$id)->first();
+
     }
 
     /**

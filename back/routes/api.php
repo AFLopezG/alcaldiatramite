@@ -73,5 +73,9 @@ Route::post('/consprop',[\App\Http\Controllers\FormularioController::class,'cons
         Route::post('/reasignar',[\App\Http\Controllers\LogController::class,'reasignar']); 
         
         Route::put('/upPerfilProc/{proceso}',[\App\Http\Controllers\ProcesoController::class,'upPerfilProc']);
+        Route::post('/agregarRequisito',[\App\Http\Controllers\TramiteController::class,'agregarRequisito']); 
+        Route::post('/retirarRequisito',[\App\Http\Controllers\TramiteController::class,'retirarRequisito']); 
+        Route::post('/agregarProceso',[\App\Http\Controllers\TramiteController::class,'agregarProceso']); 
+        Route::post('/retirarProceso',[\App\Http\Controllers\TramiteController::class,'retirarProceso']);  
         
 });
