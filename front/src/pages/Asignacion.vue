@@ -15,30 +15,50 @@
               </q-card-section>
               <q-card-section >
                 <q-form @submit.prevent="guardar">
-                  <div class="row" style="border: 1px solid rgba(128,128,128,0.90)">
-
-                    <div class="col-md-6 col-xs-12 q-pa-xs"><q-select dense label="TRAMITE" v-model="tramite" :options="tramites" required outlined  /></div>
-                    <div class="col-md-2 col-xs-12 q-pa-xs"> <q-input class="inputPrice" required dense label="NUMERO"   type="number"   autofocus  v-model="dato.numero" outlined />                      </div>
-                    <div class="col-md-2 col-xs-12 q-pa-xs"><q-input class="inputPrice" dense label="GESTION" v-model="dato.gestion" type="number" required outlined   :rules="[val => val>1900 && val<9999 || 'Ingrese gestion ']"/></div>
-                    <div class="col-md-2 col-xs-12 q-pa-xs"><q-select dense label="DISTRITO" v-model="dato.distrito" :options="['','D1','D2','D3','D4','D5','D6']" outlined  /></div>
+                  <div class="row" >
                     <div class="col-md-6 col-xs-12 q-pa-xs">
-                      <q-input style="text-transform: uppercase;" dense label="Gestor CI" v-model="dato.gestorci"  outlined list="gestores" name="myBrowser" @update:model-value="cambio" />
-                    <datalist id="gestores">
-                      <option v-for="r in gestores" :key="r.gestorci">{{r.gestorci}}</option>
-                    </datalist>
-                    </div>
-                    <div class="col-md-6 col-xs-12 q-pa-xs"><q-input style="text-transform: uppercase;" dense label="Gestor Nombre" v-model="dato.gestornom"  outlined  /></div>
-                    <div class="col-md-12 col-xs-12  q-pa-xs"><q-input dense label="DETALLE" v-model="dato.detalle"  outlined  /></div>
-                    <!--<div class="col-md-12 col-xs-12  q-pa-xs"><q-input dense label="Observacion" v-model="dato.observacion"  outlined  /></div> -->
-                  </div><br>
-                  <div class="row" style="border: 1px solid rgba(128,128,128,0.90)">
-
-                    <div class="col-sm-4 col-xs-6 q-pa-xs"><q-input class="inputPrice" v-model="propietario.cedula" label="NRO CARNET" type="number" dense required outlined @keyup="buscarProp"/></div>
-                    <div class="col-sm-4 col-xs-6 q-pa-xs"><q-input v-model="propietario.complemento" type="text" label="COMPLEMENTO" dense  outlined  @keyup="buscarProp" style="text-transform: uppercase;"/></div>
-                    <div class="col-sm-6 col-xs-12 q-pa-xs"><q-input v-model="propietario.nombre" type="text" label="Nombres" dense required outlined style="text-transform: uppercase;"/></div>
-                    <div class="col-sm-6 col-xs-12 q-pa-xs"><q-input v-model="propietario.apellido" type="text" label="Apellidos" dense required outlined style="text-transform: uppercase;"/></div>
-                    <!--<div class="col-sm-12 col-12 q-pa-xs"><q-input v-model="dato.observacion" type="text" label="Observacion" dense outlined/></div>-->
+                      <div class="row " style="border: 1px solid rgba(128,128,128,0.90)">
+                    <div class="col-12 text-bold text-center">DATOS DE TRAMITE</div><br>
+                      <div class="col-md-12 col-xs-12 q-pa-xs"><q-select dense label="TRAMITE" v-model="tramite" :options="tramites" required outlined  /></div>
+                      <div class="col-md-4 col-xs-12 q-pa-xs"> <q-input class="inputPrice" required dense label="NUMERO"   type="number"   autofocus  v-model="dato.numero" outlined />                      </div>
+                      <div class="col-md-4 col-xs-12 q-pa-xs"><q-input class="inputPrice" dense label="GESTION" v-model="dato.gestion" type="number" required outlined   :rules="[val => val>1900 && val<9999 || 'Ingrese gestion ']"/></div>
+                      <div class="col-md-4 col-xs-12 q-pa-xs"><q-select dense label="DISTRITO" v-model="dato.distrito" :options="['','D1','D2','D3','D4','D5','D6']" outlined  /></div>
+                      <div class="col-md-12 col-xs-12  q-pa-xs"><q-input dense label="DETALLE" v-model="dato.detalle"  outlined  /></div>
                   </div>
+                  <div class="row " style="border: 1px solid rgba(128,128,128,0.90)">
+                    <div class="col-12 text-bold text-center">REQUISITOS</div><br>
+                    
+                    </div>
+                    </div>
+                    <div class="col-md-6 col-xs-12 q-pa-xs" >
+
+                  <div class="row" style="border: 1px solid rgba(128,128,128,0.90)">
+                    <div class="col-12 text-bold text-center">DATOS DE TRAMITADOR</div><br>
+                      <div class="col-md-6 col-xs-12 q-pa-xs">
+                        <q-input style="text-transform: uppercase;" dense label="Gestor CI" v-model="dato.gestorci"  outlined list="gestores" name="myBrowser" @update:model-value="cambio" />
+                      <datalist id="gestores">
+                        <option v-for="r in gestores" :key="r.gestorci">{{r.gestorci}}</option>
+                      </datalist>
+                    </div>
+                      <div class="col-md-6 col-xs-12 q-pa-xs">
+                        <q-input class="inputPrice" dense label="Gestor Celular" v-model="dato.gestorcel"  outlined  type="number"/>
+
+                      </div>
+                    <div class="col-md-12 col-xs-12 q-pa-xs"><q-input style="text-transform: uppercase;" dense label="Gestor Nombre" v-model="dato.gestornom"  outlined  /></div>
+                    <!--<div class="col-md-12 col-xs-12  q-pa-xs"><q-input dense label="Observacion" v-model="dato.observacion"  outlined  /></div> -->
+                    </div>
+                    <br>
+                  <div class="row" style="border: 1px solid rgba(128,128,128,0.90)">
+                    <div class="col-12 text-bold text-center">DATOS DE CLIENTE *</div><br>
+                    <div class="col-sm-4 col-xs-6 q-pa-xs"><q-input class="inputPrice" v-model="propietario.cedula" label="NRO CARNET*" type="number" dense required outlined @keyup="buscarProp"/></div>
+                    <div class="col-sm-2 col-xs-6 q-pa-xs"><q-input v-model="propietario.complemento" type="text" label="COMP" dense  outlined  @keyup="buscarProp" style="text-transform: uppercase;"/></div>
+                    <div class="col-sm-6 col-xs-6 q-pa-xs"><q-input class="inputPrice" v-model="propietario.celular" type="number" label="CELULAR" dense  outlined  /></div>
+                    <div class="col-sm-6 col-xs-12 q-pa-xs"><q-input v-model="propietario.nombre" type="text" label="Nombres *" dense required outlined style="text-transform: uppercase;"/></div>
+                    <div class="col-sm-6 col-xs-12 q-pa-xs"><q-input v-model="propietario.apellido" type="text" label="Apellidos *" dense required outlined style="text-transform: uppercase;"/></div>
+                  </div>
+                </div>
+                </div>
+
                     <div class="col-sm-2 col-12 q-pa-xs flex flex-center">
                       <q-btn type="submit" color="primary" icon="add_circle" label="Registrar" v-if="dato.id==undefined || dato.id==''" dense/>
                       <q-btn type="submit" color="amber" icon="edit" label="Modificar" v-else dense/>
@@ -368,11 +388,13 @@ TimeAgo.addDefaultLocale(es)
     methods:{
       cambio(){
       this.dato.gestornom=''
+      this.dato.gestorcel=''
        console.log(this.dato.gestorci)
       this.gestores.find(r=>{ 
         if (r.gestorci===this.dato.gestorci){
           // console.log(r.cargo)
           this.dato.gestornom=r.gestornom
+          this.dato.gestorcel=r.gestorcel
           return false
         }else{
           // this.cargo=''

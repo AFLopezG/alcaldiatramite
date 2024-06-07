@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('habilita')->nullable();
             $table->string('gestorci')->nullable();
             $table->string('gestornom')->nullable();
+            $table->string('gestorcel')->nullable();
             $table->string('estado');
             $table->date('fecha');
             $table->time('hora');

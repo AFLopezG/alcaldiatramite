@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('complemento')->nullable();
             $table->string('nombre');
             $table->string('apellido');
+            $table->string('celular')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

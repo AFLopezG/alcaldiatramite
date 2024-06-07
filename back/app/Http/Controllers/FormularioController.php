@@ -102,6 +102,7 @@ class FormularioController extends Controller
                 $propietario->complemento=strtoupper($comp);
                 $propietario->nombre=strtoupper($request->propietario['nombre']);
                 $propietario->apellido=strtoupper($request->propietario['apellido']);
+                $propietario->celular=$request->propietario['celular'];
                 $propietario->save();
 
             }
@@ -109,6 +110,7 @@ class FormularioController extends Controller
             $propietario=Propietario::where('cedula',$request->propietario['cedula'])->where('complemento',$comp)->first();
             $propietario->nombre=strtoupper($request->propietario['nombre']);
             $propietario->apellido=strtoupper($request->propietario['apellido']);
+            $propietario->celular=$request->propietario['celular'];
             $propietario->save();
         }
 
@@ -135,8 +137,9 @@ class FormularioController extends Controller
         $formulario->codigo=$tramite->codigo.'-'.$unit->codigo.str_pad($request->numero, 6, '0', STR_PAD_LEFT).'/'.substr($gestion,2,2);
         $formulario->codtram=str_pad($request->numero, 4, '0', STR_PAD_LEFT).'/'.substr($gestion,2,2);
         $formulario->distrito=$request->distrito;
-        $formulario->gestorci=$request->gestorci;
-        $formulario->gestornom=$request->gestornom;
+        $formulario->gestorci=strtoupper($request->gestorci);
+        $formulario->gestornom=strtoupper($request->gestornom);
+        $formulario->gestorcel=$request->gestorcel;
         $formulario->detalle=$request->detalle;
         $formulario->observacion=$request->observacion;
         $formulario->estado='PROCESO';
@@ -180,6 +183,7 @@ class FormularioController extends Controller
                 $propietario->complemento=strtoupper($comp);
                 $propietario->nombre=strtoupper($request->propietario['nombre']);
                 $propietario->apellido=strtoupper($request->propietario['apellido']);
+                $propietario->celular=$request->propietario['celular'];
                 $propietario->save();
 
             }
@@ -187,6 +191,7 @@ class FormularioController extends Controller
             $propietario=Propietario::where('cedula',$request->propietario['cedula'])->where('complemento',$comp)->first();
             $propietario->nombre=strtoupper($request->propietario['nombre']);
             $propietario->apellido=strtoupper($request->propietario['apellido']);
+            $propietario->celular=$request->propietario['celular'];
             $propietario->save();
         }
 
@@ -223,6 +228,7 @@ class FormularioController extends Controller
         $formulario->distrito=$request->distrito;
         $formulario->gestorci=strtoupper($request->gestorci);
         $formulario->gestornom=strtoupper($request->gestornom);
+        $formulario->gestorcel=$request->gestorcel;
         $formulario->detalle=$request->detalle;
         $formulario->observacion=$request->observacion;
         $formulario->estado='PROCESO';
@@ -341,7 +347,7 @@ class FormularioController extends Controller
     }
 
     public function listGestor(){
-        return Formulario::select('gestorci', 'gestornom')->groupBy('gestorci', 'gestornom')->get();
+        return Formulario::select('gestorci', 'gestornom','gestorcel')->groupBy('gestorci', 'gestornom','gestorcel')->get();
     }
 
     public function printReq($id){

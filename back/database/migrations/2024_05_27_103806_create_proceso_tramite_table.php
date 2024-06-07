@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('proceso_tramite', function (Blueprint $table) {
             $table->id();
+            $table->integer('orden');
             $table->unsignedBigInteger('proceso_id')->nullable();
             $table->foreign('proceso_id')->references('id')->on('procesos');
             $table->unsignedBigInteger('tramite_id')->nullable();

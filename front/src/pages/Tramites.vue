@@ -258,7 +258,7 @@
                 >
                 <q-card-section>
                     <div class="row">
-                        <div class="col-11 q-pa-xs"><q-select dense v-model="campoProc" :options="procesos" label="Procesos" option-label="nombre" @filter="filterProc" use-input input-debounce="0" >
+                        <div class="col-8 q-pa-xs"><q-select dense v-model="campoProc" :options="procesos" label="Procesos" option-label="nombre" @filter="filterProc" use-input input-debounce="0" >
                             <template v-slot:no-option>
                             <q-item>
                                 <q-item-section class="text-grey">
@@ -267,10 +267,11 @@
                             </q-item>
                             </template>
                         </q-select></div>
+                        <div class="col-3 q-pa-xs"><q-input dense v-model="orden" type="number" label="N Orden"/></div>
                         <div class="col-1"><q-btn flat color="green" icon="add_circle_outline" @click="agProceso" ><q-tooltip>AGREGAR PROCESO</q-tooltip></q-btn></div>
                     </div>
                     <div v-for="(pr,index) in tramite.procesos" :key="index" style="font-size: 12px;">
-                        <q-btn flat size="sm" color="red" icon="delete"  @click="borrarProc(pr)" />{{pr.nombre}}
+                        <q-btn flat size="sm" color="red" icon="delete"  @click="borrarProc(pr)" />{{pr.pivot.orden}} : {{pr.nombre}}
                     </div>
 
                 </q-card-section>
@@ -289,6 +290,7 @@ export default {
     data() {
         return {
             tab:'tramite',
+            orden:0,
             filtRequisito:'',
             filterProceso:'',
             campoReq:{detalle:''},
@@ -388,15 +390,18 @@ export default {
         agRequisito(){
             if(this.campoReq.id==undefined)
                 return false
+
             this.$api.post('agregarRequisito',{tramite_id:this.tramite.id,requisito_id:this.campoReq.id}).then(() => {
                 this.buscarTramite(this.tramite.id) 
             })
             
         },
         agProceso(){
+            if(this.orden < 0)
+                return false
             if(this.campoProc.id==undefined)
                 return false
-            this.$api.post('agregarProceso',{tramite_id:this.tramite.id,proceso_id:this.campoProc.id}).then(() => {
+            this.$api.post('agregarProceso',{tramite_id:this.tramite.id,proceso_id:this.campoProc.id,orden:this.orden}).then(() => {
                 this.buscarTramite(this.tramite.id) 
             })
             
@@ -442,8 +447,18 @@ export default {
       },
         buscarTramite(d){
             this.$api.get('tramite/'+d).then((res) => {
+            console.log(res.data)
                 this.tramite=res.data
-            })
+                let valor = 0
+
+                this.tramite.procesos.forEach(r=> {
+                    if(r.pivot.orden > valor)
+                        valor = r.pivot.orden                
+                });
+
+                
+                this.orden =  valor + 1
+        })
         },
         verRequisitos(r){
             this.buscarTramite(r.id)
@@ -451,6 +466,7 @@ export default {
         },
         verProcesos(r){
             this.buscarTramite(r.id)
+  
             this.dialogTProceso=true
         },
         updateperfil(){
@@ -641,6 +657,18 @@ export default {
                 // console.log('I am triggered on both OK and Cancel')
             })
       
+        }
+    },
+    computed:{
+        maxOrden(){
+            let valor = 0
+
+            this.tramite.procesos.forEach(r=> {
+                if(r.pivot.orden > valor)
+                    valor = r.pivot.orden                
+            });
+
+            return valor + 1
         }
     }
 }

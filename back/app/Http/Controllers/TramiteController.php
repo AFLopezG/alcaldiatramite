@@ -74,15 +74,16 @@ class TramiteController extends Controller
     }
 
     public function agregarProceso(Request $request ){
-        $valida = DB::SELECT("SELECT * from proceso_tramite where proceso_id=$request->proceso_id and tramite_id=$request->tramite_id");
+        $valida = DB::SELECT("SELECT * from proceso_tramite where proceso_id=$request->proceso_id and tramite_id=$request->tramite_id and orden = $request->orden");
+        
         if(sizeof($valida)==0)
         {
-            DB::SELECT("INSERT INTO proceso_tramite  (proceso_id,tramite_id) values ($request->proceso_id, $request->tramite_id)");
+            DB::SELECT("INSERT INTO proceso_tramite  (proceso_id,tramite_id,orden) values ($request->proceso_id, $request->tramite_id,$request->orden)");
         }
     }
 
     public function retirarRequisito(Request $request){
-        return DB::SELECT("DELETE FROM requisito_tramite where requisito_id=$request->requisito_id and tramite_id=$request->tramite_id");
+        return DB::SELECT("DELETE FROM requisito_tramite where requisito_id=$request->requisito_id and tramite_id=$request->tramite_id ");
     }
 
     public function retirarProceso(Request $request){

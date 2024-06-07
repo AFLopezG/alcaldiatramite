@@ -49,6 +49,7 @@ class UserSeeder extends Seeder
             ["cedula"=>"4075600","name"=>"Arq. Freddy Mollo Mollo","email"=>"fmollo@gamo.com",'password'=>Hash::make('123456'),"fechalimite"=>"2024-12-31","cargo_id"=>5],
             ["cedula"=>"35444407","name"=>"Arq. Heidi Marcela Nicolas Magne","email"=>"hnicolas@gamo.com",'password'=>Hash::make('123456'),"fechalimite"=>"2024-12-31","cargo_id"=>5],
             ["cedula"=>"3534902","name"=>"Abg. Claudia Melby Llanque Ramirez","email"=>"cllanque@gamo.com",'password'=>Hash::make('123456'),"fechalimite"=>"2024-12-31","cargo_id"=>14],
+            ["cedula"=>"0011111","name"=>"Osvaldo Guzman Pañuni","email"=>"oguzman@gamo.com",'password'=>Hash::make('123456'),"fechalimite"=>"2024-12-31","cargo_id"=>2],
     
         ]);
 

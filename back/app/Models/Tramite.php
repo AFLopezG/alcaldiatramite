@@ -26,6 +26,6 @@ class Tramite extends Model
     }
 
     public function procesos(){
-        return $this->belongsToMany(Proceso::class);
+        return $this->belongsToMany(Proceso::class)->withPivot('orden');
     }
 }
