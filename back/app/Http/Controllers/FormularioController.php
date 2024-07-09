@@ -10,6 +10,7 @@ use App\Models\Propietario;
 use App\Models\User;
 use App\Models\Tramite;
 use App\Models\Unit;
+use App\Models\Delegado;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
@@ -92,6 +93,14 @@ class FormularioController extends Controller
         $tramite=Tramite::where('id',$request->tramite_id)->first();
         $unit=Unit::where('id',$tramite->unit_id)->first();
 
+        $proceso=DB::SELECT("SELECT pr.*,pt.orden from procesos pr inner join proceso_tramite pt on pr.id = pt.proceso_id 
+        where pt.tramite_id=$tramite->id  and pt.orden=(SELECT min(orden) from proceso_tramite pt2 where pt2.tramite_id=pt.tramite_id)");
+
+        if(sizeof($proceso)>0)
+        {   $proceso2=$proceso[0];}
+        else
+        return response(['message' => 'ERROR DE PROCESO'],500);
+
         $comp=$request->propietario['complemento'];
         if($comp==null)
             $comp='';
@@ -115,12 +124,13 @@ class FormularioController extends Controller
         }
 
         if($request->numero == null){
-            $gestion = date('Y'); 
-            if(Formulario::where('unit_id',$tramite->unit_id)->where('gestion',$gestion)->where('tramite_id',$request->tramite_id)->count()>=0)
+            $gestion = date('Y');
+            $canTram=Formulario::where('unit_id',$tramite->unit_id)->where('gestion',$gestion)->where('tramite_id',$request->tramite_id)->count(); 
+            if( $canTram < 1)
                 $numero=1;
             else{
-            $form = Formulario::where('unit_id',$tramite->unit_id)->where('gestion',$gestion)->where('tramite_id',$request->tramite_id)->count();
-            $numero = $form->numero + 1; }            
+                $numero = $canTram + 1; 
+            }            
         }
         else
         {
@@ -128,7 +138,29 @@ class FormularioController extends Controller
             $gestion = $request->gestion; 
         }
 
-        if(Formulario::where('numero',$numero)->where('gestion',$gestion)->where('unit_id',$unit->id)->where('tramite_id',$request->tramite_id)->count()>0)
+        if(!isset($request->delegado['cedula']) && !isset($request->delegado['nombre'])){
+            if(isset($request->delegado['id']))
+            {
+                $delegado=Delegado::find($request->delegado['id']);
+                $delegado->cedula=$request->delegado['cedula'];
+                $delegado->nombre=$request->delegado['nombre'];
+                $delegado->celular=$request->delegado['celular'];
+                $delegado->save();
+            }
+            else{
+                $delegado= new Delegado();
+                $delegado->cedula=$request->delegado['cedula'];
+                $delegado->nombre=$request->delegado['nombre'];
+                $delegado->celular=$request->delegado['celular'];
+                $delegado->save();
+            }
+            $delegado_id=$delegado->id;
+        }
+        else{
+            $delegado_id=null;
+        }
+
+        if(Formulario::where('numero',$numero)->where('gestion',$gestion)->where('unit_id',$tramite->unit_id)->where('tramite_id',$request->tramite_id)->count() > 0)
             return response(['message' => 'YA SE ENCUENTRA REGISTRADO'],500);
 
         $formulario=new Formulario();
@@ -137,31 +169,32 @@ class FormularioController extends Controller
         $formulario->codigo=$tramite->codigo.'-'.$unit->codigo.str_pad($request->numero, 6, '0', STR_PAD_LEFT).'/'.substr($gestion,2,2);
         $formulario->codtram=str_pad($request->numero, 4, '0', STR_PAD_LEFT).'/'.substr($gestion,2,2);
         $formulario->distrito=$request->distrito;
-        $formulario->gestorci=strtoupper($request->gestorci);
-        $formulario->gestornom=strtoupper($request->gestornom);
-        $formulario->gestorcel=$request->gestorcel;
+
         $formulario->detalle=$request->detalle;
         $formulario->observacion=$request->observacion;
-        $formulario->estado='PROCESO';
+        $formulario->estado='EN PROCESO';
 
         $formulario->fecha=date('Y-m-d');
         $formulario->hora=date('H:i:s');
         $formulario->propietario_id=$propietario->id;
+        $formulario->delegado_id=$delegado_id;
         $formulario->tramite_id=$request->tramite_id;
         $formulario->unit_id=$unit->id;
         $formulario->user_id=$request->user()->id;
-        $formulario->cargo_id=$request->user()->cargo_id;
         $formulario->save();
 
         $log=new Log();
         $log->formulario_id=$formulario->id;
         $log->user_id=null;
         $log->user_id2=$request->user()->id;
-        $log->cargo_id=$request->user()->cargo_id;
         $log->fecha=date('Y-m-d');
         $log->hora=date('H:i:s');
+        $log->orden=1;
+        $log->estado='EN PROCESO';
+        $log->user_id=null;
+        $log->proceso_id=$proceso2->id;
+        $log->orden=$proceso2->orden;
         $log->save();
-
         return $formulario;
     }
 
@@ -252,91 +285,50 @@ class FormularioController extends Controller
     {
 
             $list=[];
-            $paginate = 20;
-   
+            $paginate = 20;   
             $searchdata=$request->search;
-            switch($request->tipoasignacion){
+            $user=$request->user()->id;
+            $resultado='';
+            switch($request->estado){
                 case 'proceso':
-                    $listlog=DB::SELECT("SELECT max(id) id,formulario_id
-                    from logs
-                    where formulario_id in (SELECT l2.formulario_id from logs l2
-                    inner join formularios f on f.id=l2.formulario_id
-                    inner join propietarios p on p.id=f.propietario_id
-                    where l2.user_id2=".$request->user()->id." and f.estado IN ('PROCESO') and f.deleted_at is null 
-                    and (f.codtram like '%".$searchdata."%'  or p.apellido LIKE '%".$searchdata."%' or p.nombre LIKE '%".$searchdata."%'))
-                    GROUP by formulario_id order by id desc");
+                    $resultado=Formulario::with(['tramite','propietario','delegado'])->where('estado','EN PROCESO')
+                    ->whereHas('tramite', function($q) use($searchdata){
+                        $q->where('nombre', 'like', "%".$searchdata."%");
+                    })
+                    ->whereHas('propietario', function($q) use($searchdata){
+                        $q->where('apellido', 'like', "%".$searchdata."%");
+                        $q->orWhere('nombre', 'like', "%".$searchdata."%");
+                    })
+                    ->whereHas('delegado', function($q) use($searchdata){
+                        $q->where('nombre', 'like', "%".$searchdata."%");
+                    })
+                    ->paginate($paginate);
                     break;
-                case 'suspendido':
-                    $listlog=DB::SELECT("SELECT max(id) id,formulario_id
-                    from logs
-                    where formulario_id in (SELECT l2.formulario_id from logs l2 inner join formularios f on f.id=l2.formulario_id
-                    inner join propietarios p on p.id=f.propietario_id
-                    where l2.user_id2=".$request->user()->id." and f.estado IN ('SUSPENDIDO') and f.deleted_at is null 
-                    and (f.codtram like '%".$searchdata."%'  or p.apellido LIKE '%".$searchdata."%' or p.nombre LIKE '%".$searchdata."%'))
-                    GROUP by formulario_id order by id desc");
+                case 'RECTIFICACION':
+
                     break;
-                case 'finalizado':
-                    $listlog=DB::SELECT("SELECT max(id) id,formulario_id
-                    from logs
-                    where formulario_id in (SELECT l2.formulario_id from logs l2 inner join formularios f on f.id=l2.formulario_id
-                    inner join propietarios p on p.id=f.propietario_id
-                    where l2.user_id2=".$request->user()->id." and f.estado IN ('FINALIZADO') and f.deleted_at is null 
-                    and (f.codtram like '%".$searchdata."%'  or p.apellido LIKE '%".$searchdata."%' or p.nombre LIKE '%".$searchdata."%'))
-                    GROUP by formulario_id order by id desc");
+                case 'FINALIZADO':
+
+                    break;
+                case 'CANCELADO':
+
                     break;
                 case 'todo':
-                $listlog=DB::SELECT("SELECT max(id) id,formulario_id
-                from logs
-                where formulario_id in (SELECT l2.formulario_id from logs l2
-                inner join formularios f on f.id=l2.formulario_id
-                inner join propietarios p on p.id=f.propietario_id
-                where l2.user_id2=".$request->user()->id." and f.deleted_at is null 
-                  and (f.codtram like '%".$searchdata."%'  or p.apellido LIKE '%".$searchdata."%' or p.nombre LIKE '%".$searchdata."%'))
-                  GROUP by formulario_id order by id desc");
-                break;
                 default:
-                $listlog=DB::SELECT("SELECT max(id) id,formulario_id
-                from logs
-                where formulario_id in (SELECT l2.formulario_id from logs l2
-                inner join formularios f on f.id=l2.formulario_id
-                inner join propietarios p on p.id=f.propietario_id
-                where l2.user_id2=".$request->user()->id." and f.deleted_at is null
-                  and (f.codtram like '%".$searchdata."%'  or p.apellido LIKE '%".$searchdata."%' or p.nombre LIKE '%".$searchdata."%'))
-                  GROUP by formulario_id order by id desc");
-                    break;
-            }
+                    $resultado=Formulario::with(['tramite','propietario','delegado','latestLog'])
+                    ->whereHas('latestLog', function($query) use ($user) {
+                        $query->where('user_id2', $user);
+                    })
+                    ->orWhere('codigo','like','%'.$searchdata.'%')
+                    ->orWhereRelation('tramite','nombre','%'.$searchdata.'%')
+                    ->orWhereRelation('propietario','nombre','%'.$searchdata.'%')
+                    ->orWhereRelation('propietario','apellido','%'.$searchdata.'%')
+                    ->paginate($paginate);
 
-           foreach ($listlog as $r) {
-                    array_push($list,$r->id);
+                    break;
+
             }
-            if($request->tipoasignacion=='proceso')
-    {
-        return Log::whereIn('id', $list)
-        ->where('user_id2',$request->user()->id)
-        ->with('user')
-        ->with('user2')
-        ->with('cargo')
-        ->with(['formulario' => function ($query) {
-                 $query->with('logs');
-                 $query->with('tramite');
-                 $query->with('propietario');
-             }])
-        ->whereNull('deleted_at')
-        ->orderBy('id','desc')->paginate($paginate);
-    }
-    else{
-            return Log::whereIn('id', $list)
-            ->with('user')
-            ->with('user2')
-            ->with('cargo')
-            ->with(['formulario' => function ($query) {
-                     $query->with('logs');
-                     $query->with('tramite');
-                     $query->with('propietario');
-                 }])
-            ->whereNull('deleted_at')
-            ->orderBy('id','desc')->paginate($paginate);
-        }
+            return $resultado;
     }
 
     public function cambioAsignado(Request $request){

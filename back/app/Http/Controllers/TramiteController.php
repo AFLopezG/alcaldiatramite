@@ -29,7 +29,7 @@ class TramiteController extends Controller
                 # code...
                 array_push($resultado,$value->unit_id);
             }
-        return Tramite::where('estado','ACTIVO')->whereIN('unit_id',$resultado)->get();
+        return Tramite::with('requisitos')->with('procesos')->where('estado','ACTIVO')->whereIN('unit_id',$resultado)->get();
     }
 
     /**

@@ -26,8 +26,8 @@
                       <div class="col-md-12 col-xs-12  q-pa-xs"><q-input dense label="DETALLE" v-model="dato.detalle"  outlined  /></div>
                   </div>
                   <div class="row " style="border: 1px solid rgba(128,128,128,0.90)">
-                    <div class="col-12 text-bold text-center">REQUISITOS</div><br>
-                    
+                    <div class="col-12 text-bold text-center">REQUISITOS</div>
+                      <ul><li v-for="rq in tramite.requisitos " :key="rq">{{ rq.detalle }}</li> </ul>
                     </div>
                     </div>
                     <div class="col-md-6 col-xs-12 q-pa-xs" >
@@ -35,16 +35,16 @@
                   <div class="row" style="border: 1px solid rgba(128,128,128,0.90)">
                     <div class="col-12 text-bold text-center">DATOS DE TRAMITADOR</div><br>
                       <div class="col-md-6 col-xs-12 q-pa-xs">
-                        <q-input style="text-transform: uppercase;" dense label="Gestor CI" v-model="dato.gestorci"  outlined list="gestores" name="myBrowser" @update:model-value="cambio" />
+                        <q-input style="text-transform: uppercase;" dense label="Gestor CI" v-model="delegado.cedula"  outlined list="gestores" name="myBrowser" @update:model-value="cambio" />
                       <datalist id="gestores">
-                        <option v-for="r in gestores" :key="r.gestorci">{{r.gestorci}}</option>
+                        <option v-for="r in gestores" :key="r.gestorci">{{r.cedula}}</option>
                       </datalist>
                     </div>
                       <div class="col-md-6 col-xs-12 q-pa-xs">
-                        <q-input class="inputPrice" dense label="Gestor Celular" v-model="dato.gestorcel"  outlined  type="number"/>
+                        <q-input class="inputPrice" dense label="Gestor Celular" v-model="delegado.celular"  outlined  type="number"/>
 
                       </div>
-                    <div class="col-md-12 col-xs-12 q-pa-xs"><q-input style="text-transform: uppercase;" dense label="Gestor Nombre" v-model="dato.gestornom"  outlined  /></div>
+                    <div class="col-md-12 col-xs-12 q-pa-xs"><q-input style="text-transform: uppercase;" dense label="Gestor Nombre" v-model="delegado.nombre"  outlined  /></div>
                     <!--<div class="col-md-12 col-xs-12  q-pa-xs"><q-input dense label="Observacion" v-model="dato.observacion"  outlined  /></div> -->
                     </div>
                     <br>
@@ -114,7 +114,7 @@
 
             <template v-slot:body-cell-tramite="props">
                 <q-td  :props="props" >
-                  {{ props.row.tramite }}
+                  {{ props.row.tramite.nombre }}
                   <br>
                   <q-btn size="xs" color="blue" flat label="Requisitos" @click="impresion(props.row.id)" />
                 </q-td>
@@ -291,18 +291,15 @@
   </template>
 
   <script>
-  import TimeAgo from 'javascript-time-ago'
   import {date} from 'quasar'
 import { globalStore } from '../stores/globalStore'
-import es from 'javascript-time-ago/locale/es'
 import {Printd} from 'printd'
-TimeAgo.addDefaultLocale(es)
-          const timeAgo = new TimeAgo('es-ES')
   export default {
     name: 'AsignacionPage',
     data(){
       return {
         store: globalStore(),
+        delegado:{},
         propietario:{},
         observacion:'',
         remitir:{},
@@ -344,13 +341,11 @@ TimeAgo.addDefaultLocale(es)
         columns:[
           {name:'opciones',field:'opciones',label:'OPCIONES',align:'right'},
           {name:'codigo',field:'codigo',label:'CODIGO',align:'left'},
-          {name:'tramite',field: 'tramite',label:'TRAMITE',align:'left'},
+          {name:'tramite',field: row=>row.tramite.nombre,label:'TRAMITE',align:'left'},
           {name:'distrito',field:'distrito',label:'DISTRITO',align:'left'},
-          {name:'cedula',field:'cedula',label:'CEDULA',align:'left'},
+          {name:'cedula',field:row=>row.propietario.cedula,label:'CEDULA',align:'left'},
           {name:'propietario',field:row=> row.propietario.nombre +' '+row.propietario.apellido,label:'PROPIETARIO',align:'left'},
           {name:'datos',field: 'datos',label:'DATOS',align:'left'},
-          {name:'logs',field:'logs',label:'HISTORIAL',align:'left'},
-          {name:'dias',field:'dias',label:'DIAS',align:'right'},
         ],
         pagination:{
           // sortBy: 'name',
@@ -387,14 +382,14 @@ TimeAgo.addDefaultLocale(es)
     },
     methods:{
       cambio(){
-      this.dato.gestornom=''
-      this.dato.gestorcel=''
-       console.log(this.dato.gestorci)
+      this.delegado.nombre=''
+      this.delegado.celular=''
+       //onsole.log(this.dato.gestorci)
       this.gestores.find(r=>{ 
-        if (r.gestorci===this.dato.gestorci){
+        if (r.cedula===this.delegado.cedula){
           // console.log(r.cargo)
-          this.dato.gestornom=r.gestornom
-          this.dato.gestorcel=r.gestorcel
+          this.delegado.nombre=r.nombre
+          this.delegado.celular=r.celular
           return false
         }else{
           // this.cargo=''
@@ -403,7 +398,7 @@ TimeAgo.addDefaultLocale(es)
       })
     },
       getGestor(){
-        this.$api.get('listGestor').then((res) => {
+        this.$api.get('delegado').then((res) => {
           console.log(res.data)
           this.gestores=[]
           this.gestores=res.data
@@ -513,14 +508,18 @@ TimeAgo.addDefaultLocale(es)
          this.propietario.id=null
           this.propietario.nombre=null
           this.propietario.apellido=null
-         } else
+          this.propietario.celular=null
+         } else{
 
         this.propietario.complemento = complemento.replace(/\s+/g, '')
+      }
           this.$api.post('searchProp',this.propietario).then((res) => {
           console.log(res.data)
           this.propietario.id=res.data.id
           this.propietario.nombre=res.data.nombre
           this.propietario.apellido=res.data.apellido
+          this.propietario.celular=res.data.celular
+          console.log(this.propietario)
         })
       },
       getTramites(){
@@ -529,6 +528,7 @@ TimeAgo.addDefaultLocale(es)
         console.log(res.data)
           res.data.forEach(r => {
             r.label=r.nombre
+            if(r.procesos.length > 0)
             this.tramites.push(r)
           })
         })
@@ -699,40 +699,18 @@ TimeAgo.addDefaultLocale(es)
         this.formularios=[]
         //this.$q.loading.show()
         this.loading=true
-        console.log(this.tipoasignacion)
-        this.$api.post('micorreo',{tipoasignacion:this.tipoasignacion,search:this.filter,page:this.current}).then(res=>{
+        this.$api.post('micorreo',{estado:this.tipoasignacion,search:this.filter,page:this.current}).then(res=>{
             console.log(res.data)
 
           this.current= res.data.current_page
           this.last_page= res.data.last_page
-          res.data.data.forEach(r=>{
-              const dias = timeAgo.format(Date.parse( r.fecha + ' ' + r.hora))
-              this.formularios.push({
-              id:r.formulario.id,
-              codigo:r.formulario.codigo,
-              numero:r.formulario.numero,
-              cargo:r.cargo.nombre,
-              fecha:r.fecha,
-              hora:r.hora,
-              gestion:r.formulario.gestion,
-              distrito:r.formulario.distrito,
-              estado:r.formulario.estado,
-              tramite:r.formulario.tramite.nombre,
-              ftram:r.formulario.tramite,
-              propietario:r.formulario.propietario,
-              observacion:r.formulario.observacion,
-              detalle:r.formulario.detalle,
-              cedula:r.formulario.propietario.cedula+(r.formulario.propietario.complemento==''?'':'-'+r.formulario.propietario.complemento),
-              user_id0:r.formulario.user_id,
-              user_id2:r.user_id2,
-              logs:r.formulario.logs,
-              dias:dias
-          })})
+          this.formularios=res.data.data
           this.loading=false
           this.$q.loading.hide()
           console.log(this.formularios)
         })
       },
+
       handleRequest(props){
           console.log('halderesquest: ',props)
           if(props.pagination.rowsPerPage===0){
@@ -856,7 +834,8 @@ TimeAgo.addDefaultLocale(es)
           if(this.propietario.complemento==undefined) 
           this.propietario.complemento=''
           this.dato.tramite_id=this.tramite.id
-          this.dato.propietario=this.propietario 
+          this.dato.propietario=this.propietario
+          this.dato.delegado=this.delegado
           console.log(this.dato.id==undefined || this.dato.id=='')
           if(this.dato.id==undefined || this.dato.id==''){
             // console.log('new')
@@ -865,6 +844,7 @@ TimeAgo.addDefaultLocale(es)
               console.log(res.data)
               this.dato={gestion:date.formatDate(Date.now(),'YYYY')};
               this.propietario={}
+              this.delegado={}
               this.filter=''
               this.codigo= res.data.codigo
               this.misdatos()

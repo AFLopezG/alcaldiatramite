@@ -33,7 +33,7 @@ export default boot(({ app, router }) => {
       globalStore().isLoggedIn = true
 
     response.data.units.forEach( (r: { nombre: string }) => {
-      globalStore().units += r.nombre
+      globalStore().units +=  ' * ' +r.nombre 
     })
           response.data.permisos.forEach( (r: { id: number }) => {
           if(r.id==1) globalStore().booluser=true

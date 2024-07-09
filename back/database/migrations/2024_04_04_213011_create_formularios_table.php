@@ -21,27 +21,25 @@ return new class extends Migration
             $table->string('distrito')->nullable();
             $table->string('detalle')->nullable();
             $table->string('observacion')->nullable();
-            $table->string('habilita')->nullable();
-            $table->string('gestorci')->nullable();
-            $table->string('gestornom')->nullable();
-            $table->string('gestorcel')->nullable();
+;
             $table->string('estado');
             $table->date('fecha');
             $table->time('hora');
-            $table->unsignedBigInteger('tramite_id')->nullable();
+
+            $table->unsignedBigInteger('delegado_id')->nullable();
+            $table->foreign('delegado_id')->references('id')->on('delegados');
+
+            $table->unsignedBigInteger('tramite_id');
             $table->foreign('tramite_id')->references('id')->on('tramites');
 
-            $table->unsignedBigInteger('propietario_id')->nullable();
+            $table->unsignedBigInteger('propietario_id');
             $table->foreign('propietario_id')->references('id')->on('propietarios');
 
-            $table->unsignedBigInteger('user_id')->nullable();
-            $table->foreign('user_id')->references('id')->on('users');
-
-            $table->unsignedBigInteger('cargo_id')->nullable();
-            $table->foreign('cargo_id')->references('id')->on('cargos');
-                                                                                                                                                                                                
-            $table->unsignedBigInteger('unit_id')->nullable();
+            $table->unsignedBigInteger('unit_id');
             $table->foreign('unit_id')->references('id')->on('units');
+
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users');
             
             $table->softDeletes();
             $table->timestamps();

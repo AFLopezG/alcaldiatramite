@@ -14,10 +14,11 @@ return new class extends Migration
         Schema::create('logs', function (Blueprint $table) {
             $table->id();
             $table->date('fecha');
-            $table->time('hora');
-            
+            $table->time('hora');            
             $table->string('obs')->nullable();
-            $table->string('obs2')->nullable();
+            $table->string('estado');
+            $table->integer('orden');
+
             $table->unsignedBigInteger('user_id')->nullable();
             $table->foreign('user_id')->references('id')->on('users');
             $table->unsignedBigInteger('user_id2')->nullable();
@@ -26,8 +27,9 @@ return new class extends Migration
             $table->unsignedBigInteger('formulario_id')->nullable();
             $table->foreign('formulario_id')->references('id')->on('formularios');
 
-            $table->unsignedBigInteger('cargo_id')->nullable();
-            $table->foreign('cargo_id')->references('id')->on('cargos');
+            $table->unsignedBigInteger('proceso_id')->nullable();
+            $table->foreign('proceso_id')->references('id')->on('procesos');
+
             $table->softDeletes();
             $table->timestamps();
         });

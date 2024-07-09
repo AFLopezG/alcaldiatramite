@@ -37,6 +37,7 @@ Route::post('/consprop',[\App\Http\Controllers\FormularioController::class,'cons
         Route::apiResource('unit', App\Http\Controllers\UnitController::class);
         Route::apiResource('requisito', App\Http\Controllers\RequisitoController::class);
         Route::apiResource('proceso', App\Http\Controllers\ProcesoController::class);
+        Route::apiResource('delegado', App\Http\Controllers\DelegadoController::class);
 
         Route::resource('/cargo',\App\Http\Controllers\CargoController::class);
         Route::resource('/tramite',\App\Http\Controllers\TramiteController::class);

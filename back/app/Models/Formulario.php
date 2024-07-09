@@ -13,10 +13,10 @@ class Formulario extends Model
     'numero',
     'gestion',
     'codigo',
-    'direccion',
+    'codtram',
+    'detalle',
     'distrito',
     'observacion',
-    'habilita',
     'gestorci',
     'gestornom',
     'estado',
@@ -25,7 +25,8 @@ class Formulario extends Model
     'tramite_id',
     'propietario_id',
     'user_id',
-    'cargo_id',
+    'unit_id',
+    'delegado_id'
     ];
 
     public function cargo(){
@@ -40,11 +41,20 @@ class Formulario extends Model
         return $this->belongsTo(Propietario::class);
     }
 
+    public function delegado(){
+        return $this->belongsTo(Delegado::class);
+    }
+
     public function user(){
         return $this->belongsTo(User::class);
     }
 
     public function logs(){
-        return $this->hasMany(Log::class)->with('user')->with('user2')->with('cargo');
+        return $this->hasMany(Log::class)->with('user')->with('user2')->with('proceso');
+    }
+
+    public function latestLog()
+    {
+        return $this->hasOne(Log::class)->latestOfMany();
     }
 }

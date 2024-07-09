@@ -26,7 +26,7 @@ class UserController extends Controller
         $user = User::where('email', $request->email)->with('units')->whereDate('fechalimite','>=',date('Y-m-d'))->where('state','ACTIVO')->first();
         if ($user && sizeof($user->units)>0) {
             if (Hash::check($request->password, $user->password)) {
-                $user = User::with('permisos')->with('cargo')->with('units')->where('email', $request->email)->first();
+                $user = User::with('permisos')->with('cargo')->with('units')->with('profiles')->where('email', $request->email)->first();
                 $token = $user->createToken('authToken')->plainTextToken;
                 return response(['user' => $user, 'token' => $token]);
             } else {
@@ -39,7 +39,7 @@ class UserController extends Controller
 
     public function me(Request $request)
     {
-        $user=User::with('permisos')->with('cargo')->with('units')
+        $user=User::with('permisos')->with('cargo')->with('units')->with('profiles')
                     ->where('id',$request->user()->id)
                     ->where('state','ACTIVO')
                     ->whereDate('fechalimite','>=',date('Y-m-d'))
