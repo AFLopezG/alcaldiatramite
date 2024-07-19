@@ -10,6 +10,8 @@ import Consulta from 'pages/Consulta.vue'
 import Perfiles from 'pages/Perfiles.vue'
 import Unidades from 'pages/Unidades.vue'
 import Tramites from 'pages/Tramites.vue'
+import Vertramite from 'pages/VerTramite.vue'
+import Listado from 'pages/Listado.vue'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -24,6 +26,8 @@ const routes: RouteRecordRaw[] = [
       { path: '/asignacion/:tipoasignacion', component: Asignacion, meta: { requiresAuth: true } },
       { path: '/seguimiento', component: Seguimiento, meta: { requiresAuth: true } },
       { path: '/reporte', component: Reporte, meta: { requiresAuth: true } },
+      { path: '/vertramite/:id/:tr', component: Vertramite, meta: { requiresAuth: true } },
+      { path: '/listado', component: Listado, meta: { requiresAuth: true } },
     ],
   },
   {

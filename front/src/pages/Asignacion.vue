@@ -4,7 +4,7 @@
       <div class="row">
         <div class="col-12">
           <q-btn label="Ingresar" icon="folder_open" color="primary" @click="fromcrear" v-if="store.boolregistro"/>
-          <q-btn label="Actualizar" icon="refresh" color="amber-5" @click="actualizar" />
+          
 
           <q-dialog full-width v-model="crear">
             <q-card class="my-card" flat bordered>
@@ -84,7 +84,8 @@
             row-key="name"
           >
             <template v-slot:top-right>
-              <q-input outlined bottom-slots dense debounce="300" v-model="filter" @keyup.enter="buscar" placeholder="Buscar" @update:modelValue="misdatos">
+              <q-btn label="Actualizar" icon="refresh" color="amber-8" @click="actualizar" dense style="padding: 5px;"/>
+              <q-input outlined dense debounce="300" v-model="filter" placeholder="Buscar">
                 <template v-slot:append>
                   <q-icon v-if="filter !== ''" name="close" @click="actualizar" class="cursor-pointer" />
                   <q-icon name="search" />
@@ -93,17 +94,6 @@
             </template>
 
             <!-- opciones de impresion solo para secretaria general -->
-            <template v-slot:body-cell-fecha="props">
-                <q-td  :props="props">
-                  <div class="text-h6"> {{props.row.fecha}}<br>{{props.row.hora}}</div>
-                </q-td>
-            </template>
-
-            <template v-slot:body-cell-logs="props">
-                <q-td  :props="props" style="font-size:10px">
-                  <div v-for="s in props.row.logs" :key="s">{{ s.cargo.nombre }} {{ s.fecha }} {{ s.hora }} </div>
-                </q-td>
-            </template>
 
 
             <template v-slot:body-cell-datos="props">
@@ -130,57 +120,13 @@
             </template>
 
             <template  v-slot:body-cell-opciones="props">
-                <q-td auto-width key="opciones" :props="props">
-                  <template v-if="props.row.estado=='SUSPENDIDO'">
-                    <small style="color: red;font-weight: bold">SUSPENDIDO</small>
-                  </template>
-                  <template v-if="props.row.estado=='FINALIZADO'">
-                    <small style="color: green;font-weight: bold">FINALIZADO</small><br>
-                    <q-btn class="text-caption" color="blue-grey-6" icon="history" dense label="habilitar" @click="habilitarForm(props.row)" v-if="props.row.estado=='FINALIZADO' && props.row.user_id2==store.user.id"/>
-                  </template>
-                  <template v-if="(props.row.estado=='PROCESO' || props.row.estado=='SUSPENDIDO') && props.row.user_id2== store.user.id">
-                  <q-btn-dropdown color="primary" label="Opciones">
-                      <q-list>
-                        <q-item clickable v-close-popup @click="cargarMod(props.row) " v-if="props.row.estado=='PROCESO' && props.row.user_id0==store.user.id " >
-                          <q-item-section>
-                            <q-item-label>MODIFICAR</q-item-label>
-                          </q-item-section>
-                        </q-item>
-                        <q-item clickable v-close-popup @click="dialogremitir=true;formulario=props.row; " v-if="props.row.estado=='PROCESO' || props.row.estado=='SUSPENDIDO'" >
-                          <q-item-section>
-                            <q-item-label>DERIVAR</q-item-label>
-                          </q-item-section>
-                        </q-item>
-                        <q-item clickable v-close-popup @click="suspende(props.row)" v-if="props.row.estado=='PROCESO'">
-                          <q-item-section>
-                            <q-item-label>SUSPENDER</q-item-label>
-                          </q-item-section>
-                        </q-item>
-                        <q-item clickable v-close-popup @click="finaliza(props.row)" v-if="props.row.estado=='PROCESO'">
-                          <q-item-section>
-                            <q-item-label>FINALIZAR/ENTREGA</q-item-label>
-                          </q-item-section>
-                        </q-item>
-
-                      </q-list>
-                    </q-btn-dropdown>
-                  </template>
-                  <template v-if="props.row.estado==='PROCESO' && props.row.user_id2!= store.user.id">
-                    <small style="color: rgb(100, 0, 128);font-weight: bold">EN PROCESO</small>
-                  </template>
+                <q-td auto-width key="opciones" :props="props" style="text-align:center">
+                    <q-btn color="indigo" flat icon="file_open" dense :to="'/vertramite/'+props.row.id+'/'+props.row.tramite.id" v-if="props.row.estado=='EN PROCESO' || props.row.estado=='RECTIFICAR'"/>
+                    <div :style="'font-weight: bold;font-size: 10px; color:'+props.row.color" >{{ props.row.estado }}</div>
+              
                 </q-td>
             </template>
-            <template v-slot:bottom>
-            <div class="full-width flex flex-center">
-              <q-pagination
-                v-model="current"
-                :max="last_page"
-                :max-pages="7"
-                boundary-numbers
-                @update:modelValue="misdatos"
-              />
-            </div>
-          </template>
+
           </q-table>
 
           <q-dialog v-model="diaglosasignacion">
@@ -291,9 +237,12 @@
   </template>
 
   <script>
-  import {date} from 'quasar'
+import {date} from 'quasar'
 import { globalStore } from '../stores/globalStore'
 import {Printd} from 'printd'
+import TimeAgo from 'javascript-time-ago'
+import es from 'javascript-time-ago/locale/es'
+
   export default {
     name: 'AsignacionPage',
     data(){
@@ -345,7 +294,9 @@ import {Printd} from 'printd'
           {name:'distrito',field:'distrito',label:'DISTRITO',align:'left'},
           {name:'cedula',field:row=>row.propietario.cedula,label:'CEDULA',align:'left'},
           {name:'propietario',field:row=> row.propietario.nombre +' '+row.propietario.apellido,label:'PROPIETARIO',align:'left'},
+          {name:'fecha',field: row=>row.latest_log.fecha, label:'FECHA',align:'left'},
           {name:'datos',field: 'datos',label:'DATOS',align:'left'},
+          {name:'dias',field: 'dias',label:'PLAZO',align:'left'},
         ],
         pagination:{
           // sortBy: 'name',
@@ -414,76 +365,7 @@ import {Printd} from 'printd'
         console.log(frm)
         //this.dialogmod=true
       },
-      suspende(tr){
-        this.$q.dialog({
-        title: 'SUSPENDER TRAMITE: '+tr.codigo,
-        message: 'registre el motivo?',
-        prompt: {
-          model: '',
-          isValid: val => val.length > 2,
-          type: 'text' // optional
-        },
-        cancel: true,
-        persistent: true
-      }).onOk(data => {
-        // console.log('>>>> OK, received', data)
-        tr.observacion=data
-        this.$api.post('suspender',tr).then(() => {
-          this.misdatos()
-        })
 
-      }).onCancel(() => {
-        // console.log('>>>> Cancel')
-      }).onDismiss(() => {
-        // console.log('I am triggered on both OK and Cancel')
-      })
-      },
-      finaliza(tr){
-        this.$q.dialog({
-        title: 'FINALIZAR TRAMITE: '+tr.codigo,
-        message: 'Ingrese alguna observacion',
-        prompt: {
-          model: '',
-          type: 'text' // optional
-        },
-        cancel: true,
-        persistent: true
-      }).onOk(data => {
-        // console.log('>>>> OK, received', data)
-        tr.observacion=data
-        this.$api.post('finalizar',tr).then(() => {
-          this.misdatos()
-        })
-
-      }).onCancel(() => {
-        // console.log('>>>> Cancel')
-      }).onDismiss(() => {
-        // console.log('I am triggered on both OK and Cancel')
-      })
-      },
-      habilitarForm(tr){
-        this.$q.dialog({
-        title: 'HABILITAR TRAMITE: '+tr.codigo,
-        message: 'Ingrese el motivo',
-        prompt: {
-          model: '',
-          type: 'text' // optional
-        },
-        cancel: true,
-        persistent: true
-      }).onOk(data => {
-        // console.log('>>>> OK, received', data)
-        tr.habilita=data
-        this.$api.post('habilitar',tr).then(() => {
-          this.misdatos()
-        })
-
-      }).onCancel(() => {
-        // console.log('>>>> Cancel')
-      }).onDismiss(() => {
-        // console.log('I am triggered on both OK and Cancel')
-      })
-      },
       getUser(){
         this.usuarios=[]
         this.$api.post('listuser').then((res) => {
@@ -522,6 +404,7 @@ import {Printd} from 'printd'
           console.log(this.propietario)
         })
       },
+
       getTramites(){
         this.tramites=[]
         this.$api.post('unitTramite').then((res) => {
@@ -579,112 +462,7 @@ import {Printd} from 'printd'
         })
       },
 
-      registrarlog(){
-        // console.log({
-        //   mail_id:this.mail.id,
-        //   user_id2:this.usuario.id,
-        //   destinatario:this.usuario.name,
-        //   unit_id:this.usuario.unit_id,
-        //   accion:this.miaccion
-        // })
-        // return false
-        // console.log(this.dest);
-        if(this.usuario.id==undefined){
-          this.$q.notify({
-            message:'Debe seleccionar Usuario',
-            color:'red',
-            icon:'error'
-          })
-          return false;
-        }
-        this.$q.loading.show()
-        this.$api.post('log',{
-          user_id:this.usuario.id,
-          formulario_id:this.formulario.id,
-          obs:this.observacion
-        }).then(() =>{
-          // console.log(res.data)
-          this.filter=''
-          this.usuario={label:''}
-          this.observacion=''
-          this.misdatos()
-          // this.$q.loading.hide()
-          this.diaglosasignacion=false
-          this.dialogremitir=false
-          this.$q.notify({
-            message:'Remitido correctamente!!',
-            color:'green',
-            icon:'done'
-          })
-        }).catch(err=>{
-          this.$q.notify({
-            message:err.response.data.message,
-            color:'red',
-            icon:'error'
-          })
-          this.$q.loading.hide()
-        })
-      },
 
-
-      archivar(mail){
-        this.$q.dialog({
-          title:'Seguro de archivar?',
-           message:'Motivo de archivar (mínimo 4 carácteres)',
-           prompt:{
-             model:'',
-             isValid: val => val.length > 4, // << here is the magic
-             type:'text'
-           },
-          cancel:true,
-          persistent: true
-        }).onOk(data=>{
-          // console.log(mail)
-          this.$q.loading.show()
-          var today = new Date();
-          var now = today.toLocaleString();
-          let mensaje = `(${now}): ${data}`
-          this.$api.post(process.env.API+'/anulado',{id:mail.id,archivado:mensaje}).then(()=>{
-            // console.log(res.data)
-            this.misdatos();
-            this.$q.notify({
-              message: 'Archivado',
-              caption: 'Registro archivado',
-              color: 'green',
-              icon:'done'
-            });
-          })
-        })
-      },
-      desarchivar(mail){
-        this.$q.dialog({
-          title:'Seguro de desarchivar?',
-           message:'Motivo de desarchivar (mínimo 4 carácteres)',
-           prompt:{
-             model:'',
-             isValid: val => val.length > 4, // << here is the magic
-             type:'text'
-           },
-          cancel:true,
-          persistent: true
-        }).onOk(data=>{
-          // console.log(mail)
-          var today = new Date();
-          var now = today.toLocaleString();
-          let mensaje = `(${now}): ${data}`
-          this.$q.loading.show()
-          this.$api.post(process.env.API+'/desarchivar',{id:mail.id,desarchivado:mensaje}).then( ()=>{
-            // console.log(res.data)
-            this.misdatos();
-            this.$q.notify({
-              message: 'Desarchivado',
-              caption: 'Registro desarchivado',
-              color: 'green',
-              icon:'done'
-            });
-          })
-        })
-      },
       archivo(mail){
         console.log(mail)
         this.mail=mail
@@ -699,12 +477,20 @@ import {Printd} from 'printd'
         this.formularios=[]
         //this.$q.loading.show()
         this.loading=true
-        this.$api.post('micorreo',{estado:this.tipoasignacion,search:this.filter,page:this.current}).then(res=>{
+        this.$api.post('micorreo',{estado:this.tipoasignacion}).then(res=>{
             console.log(res.data)
-
-          this.current= res.data.current_page
-          this.last_page= res.data.last_page
-          this.formularios=res.data.data
+          TimeAgo.addDefaultLocale(es)
+          const timeAgo = new TimeAgo('es-ES')
+          res.data.forEach(r => {
+            const dias = timeAgo.format(Date.parse( r.latest_log.fecha + ' ' + r.latest_log.hora))
+            r.dias=dias
+            r.color='black'  
+              if(r.estado=='EN PROCESO') r.color='green'
+              if(r.estado=='CANCELADO'||r.estado=='RECTIFICAR') r.color='red'
+              if(r.estado=='FINALIZADO') r.color='indigo'
+              
+          });
+          this.formularios=res.data
           this.loading=false
           this.$q.loading.hide()
           console.log(this.formularios)

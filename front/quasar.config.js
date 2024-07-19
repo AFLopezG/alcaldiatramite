@@ -24,7 +24,7 @@ module.exports = configure(function (/* ctx */) {
 
       'axios',
     ],
-
+    cssAddon: true,
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
     css: [
       'app.scss'
@@ -100,7 +100,11 @@ module.exports = configure(function (/* ctx */) {
       // (like functional components as one of the examples),
       // you can manually specify Quasar components/directives to be available everywhere:
       //
-      // components: [],
+       components: [
+        'QPage',
+        'QStepper',
+        'QStep'
+       ],
       // directives: [],
 
       // Quasar plugins
@@ -211,4 +215,4 @@ module.exports = configure(function (/* ctx */) {
       // extendBexManifestJson (json) {}
     }
   }
-});
+})

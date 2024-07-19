@@ -5,15 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Profile extends Model
+class Adjunto extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'prof'];
-
-    
-    public function users()
-    {
-        return $this->belongsToMany(User::class, 'profile_user');
-    }
+    'ruta',
+    'nombre',
+    'orden',
+    'baja',
+    'formulario_id',
+    'proceso_id',
+    ];
 }

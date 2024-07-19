@@ -46,7 +46,7 @@ class ProcesoController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Proceso $proceso)
+    public function show($id)
     {
         //
     }

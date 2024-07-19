@@ -5,15 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Profile extends Model
+class Rectificado extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'prof'];
-
-    
-    public function users()
-    {
-        return $this->belongsToMany(User::class, 'profile_user');
-    }
+    'inicio',
+    'fin',
+    'orden',
+    'descripcion',
+    'tramite_id',
+    'proceso_id',
+    'user_id',
+    ];
 }

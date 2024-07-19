@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Tramite;
 use App\Models\Requisito;
 use App\Models\Proceso;
+use App\Models\User;
+use App\Models\Log;
 use App\Http\Requests\StoreTramiteRequest;
 use App\Http\Requests\UpdateTramiteRequest;
 use Illuminate\Http\Request;
@@ -87,6 +89,11 @@ class TramiteController extends Controller
     }
 
     public function retirarProceso(Request $request){
+        $cambio =DB::select("SELECT * FROM proceso_tramite where orden > $request->orden and tramite_id=$request->tramite_id");
+        foreach ($cambio as $value) {
+            # code...
+            DB::SELECT("UPDATE proceso_tramite set orden=orden - 1 where id = $value->id");
+        }
         return DB::SELECT("DELETE FROM proceso_tramite where proceso_id=$request->proceso_id and tramite_id=$request->tramite_id");
     }
 
@@ -150,4 +157,101 @@ class TramiteController extends Controller
         $tramite=Tramite::find("$id");
         $tramite->delete();
     }
+
+    public function nextProc(Request $request){
+        $norden=$request->orden + 1;
+
+        $r1=Tramite::with('procesos')->where('id',$request->id)->first();
+        //return $r1;
+        foreach ($r1->procesos as $value) {
+            if($value->pivot['orden']==$norden){
+            $users =DB::SELECT("SELECT u.id,u.name,ps.prof from users u inner join profile_user p on u.id=p.user_id inner join profiles ps on ps.id=p.profile_id
+            where u.state='ACTIVO' and p.profile_id in (select pp.profile_id from procesos pr inner join proceso_profile pp on pr.id = pp.proceso_id where pr.id=$value->id)");
+            $value->usuarios=$users;
+            if(sizeof($users)==0)
+                return false;
+            return $value;
+        }
+
+            # code...
+        }
+        /*$res= Proceso::with(['profiles', 'profiles.users.profile'])
+        ->whereHas('proceso_tramite', function($query) use ($request) {
+            $query->where('tramite_id', $request->id);
+        })
+        ->whereHas('tramites', function ($query) use ($norden) {
+            $query->wherePivot('orden', $norden);
+        })
+        ->get();*/
+    }
+    
+    public function listProcUser(Request $request){
+        $r1=Proceso::with('profiles')->where('id',$request->id)->first();
+        $list=[];
+        foreach ($r1->profiles as  $value) {
+            # code...
+            array_push($list,$value['id']);
+        }
+        $users = User::whereHas('profiles', function($query) use ($list) {
+                $query->whereIn('profile_id', $list);}
+        )->get();
+        $r1->usuarios=$users;
+        if(sizeof($users)==0)
+            return false;
+        return $r1;
+    }
+
+    public function cambioUserProc(Request $request){
+        $log=Log::find($request->id);
+        if($log->user_id2==$request->user_id)
+            return false;
+        $log->obs =$log->obs.'// '.$request->motivo;
+        $log->estado='CAMBIO';
+        $log->save();
+
+        $log2=new Log();
+        $log2->fecha=date('Y-m-d');
+        $log2->hora=date('H:i:s');
+        $log2->orden=$log->orden;
+        $log2->estado='EN PROCESO';
+        $log2->user_id=$log->user_id;
+        $log2->user_id2=$request->user_id;
+        $log2->formulario_id=$log->formulario_id;
+        $log2->proceso_id=$log->proceso_id;
+        $log2->save();
+
+    }
+
+    public function rechazar(Request $request){
+        //return $request;
+
+        $log= Log::find($request->latest_log['id']);
+        $log->obs=$log->obs.'// '.$request->comentario;
+        $log->estado='RECHAZADO';
+        $log->save();
+        
+        $norden=$log->orden - 1; 
+
+        $r1=Tramite::with('procesos')->where('id',$request->tramite_id)->first();
+        //return $r1;
+        foreach ($r1->procesos as $value) {
+            if($value->pivot['orden']==$norden){
+                $proceso=$value;
+            }
+        }
+        
+        
+        $log2=new Log();
+        $log2->formulario_id= $log->formulario_id;
+        $log2->user_id=$log->user_id2;
+        $log2->user_id2=$log->user_id;
+        $log2->fecha=date('Y-m-d');
+        $log2->hora=date('H:i:s');
+        $log2->orden=$norden;
+        $log2->estado='EN PROCESO';
+        $log2->proceso_id=$proceso->id;
+        $log2->save();
+
+    }
+
 }

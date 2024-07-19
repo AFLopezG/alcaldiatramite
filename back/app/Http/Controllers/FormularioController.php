@@ -83,6 +83,21 @@ class FormularioController extends Controller
         $formulario->habilita=$request->habilita;
         $formulario->save();
     }
+
+    public function listTramite(Request $request){
+        $units=$request->user()->units;
+        $list=[];
+        foreach ($units as $value) {
+            # code...
+            array_push($list,$value->id);
+        }
+        //return $list;
+        return Formulario::with(['tramite','propietario','delegado','latestLog'])
+        ->whereIn('unit_id',$list)
+        ->whereDate('fecha','>=',$request->fecha)
+        ->orderBy('id','desc')
+        ->get();
+    }
     /**
      * Store a newly created resource in storage.
      */
@@ -189,9 +204,7 @@ class FormularioController extends Controller
         $log->user_id2=$request->user()->id;
         $log->fecha=date('Y-m-d');
         $log->hora=date('H:i:s');
-        $log->orden=1;
         $log->estado='EN PROCESO';
-        $log->user_id=null;
         $log->proceso_id=$proceso2->id;
         $log->orden=$proceso2->orden;
         $log->save();
@@ -284,49 +297,49 @@ class FormularioController extends Controller
     public function micorreo (Request $request)
     {
 
-            $list=[];
-            $paginate = 20;   
-            $searchdata=$request->search;
             $user=$request->user()->id;
             $resultado='';
             switch($request->estado){
                 case 'proceso':
-                    $resultado=Formulario::with(['tramite','propietario','delegado'])->where('estado','EN PROCESO')
-                    ->whereHas('tramite', function($q) use($searchdata){
-                        $q->where('nombre', 'like', "%".$searchdata."%");
-                    })
-                    ->whereHas('propietario', function($q) use($searchdata){
-                        $q->where('apellido', 'like', "%".$searchdata."%");
-                        $q->orWhere('nombre', 'like', "%".$searchdata."%");
-                    })
-                    ->whereHas('delegado', function($q) use($searchdata){
-                        $q->where('nombre', 'like', "%".$searchdata."%");
-                    })
-                    ->paginate($paginate);
+                    $resultado=Formulario::with(['tramite','propietario','delegado','latestLog'])
+                    ->whereHas('latestLog', function($query) use ($user) {
+                        $query->where('user_id2', $user);
+                    })->where('estado','EN PROCESO')
+                    ->get();
                     break;
-                case 'RECTIFICACION':
-
+                case 'finalizado':
+                    $resultado=Formulario::with(['tramite','propietario','delegado','latestLog'])
+                    ->whereHas('latestLog', function($query) use ($user) {
+                        $query->where('user_id2', $user);
+                        $query->whereDate('fecha','<=',date('Y-m-d'));
+                        $query->whereDate('fecha','>=',date('Y-m-d', strtotime('-180 days')));
+                    })->where('estado','FINALIZADO')
+                    ->get();
                     break;
-                case 'FINALIZADO':
-
+                case 'cancelado':
+                    $resultado=Formulario::with(['tramite','propietario','delegado','latestLog'])
+                    ->whereHas('latestLog', function($query) use ($user) {
+                        $query->where('user_id2', $user);
+                        $query->whereDate('fecha','<=',date('Y-m-d'));
+                        $query->whereDate('fecha','>=',date('Y-m-d', strtotime('-180 days')));
+                    })->where('estado','CANCELADO')
+                    ->get();
                     break;
-                case 'CANCELADO':
-
+                case 'rectificar':
+                    $resultado=Formulario::with(['tramite','propietario','delegado','latestLog'])
+                    ->whereHas('latestLog', function($query) use ($user) {
+                        $query->where('user_id2', $user);
+                    })->where('estado','RECTIFICAR')
+                    ->get();
                     break;
                 case 'todo':
                 default:
                     $resultado=Formulario::with(['tramite','propietario','delegado','latestLog'])
                     ->whereHas('latestLog', function($query) use ($user) {
                         $query->where('user_id2', $user);
-                    })
-                    ->orWhere('codigo','like','%'.$searchdata.'%')
-                    ->orWhereRelation('tramite','nombre','%'.$searchdata.'%')
-                    ->orWhereRelation('propietario','nombre','%'.$searchdata.'%')
-                    ->orWhereRelation('propietario','apellido','%'.$searchdata.'%')
-                    ->paginate($paginate);
-
-                    break;
-
+                    })->whereIn('estado',['EN PROCESO','RECTIFICAR'])
+                    ->get();
+                break;
             }
             return $resultado;
     }
@@ -392,9 +405,10 @@ class FormularioController extends Controller
         </html>";
         return $cadena;
     }
-    public function show(Formulario $formulario)
+    public function show($id)
     {
         //
+        return json_encode(Formulario::with('rectificados')->with('tramite')->with('propietario')->with('delegado')->with('latestLog')->where('id',$id)->first());
     }
 
     /**

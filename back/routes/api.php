@@ -39,11 +39,13 @@ Route::post('/consprop',[\App\Http\Controllers\FormularioController::class,'cons
         Route::apiResource('proceso', App\Http\Controllers\ProcesoController::class);
         Route::apiResource('delegado', App\Http\Controllers\DelegadoController::class);
 
-        Route::resource('/cargo',\App\Http\Controllers\CargoController::class);
-        Route::resource('/tramite',\App\Http\Controllers\TramiteController::class);
-        Route::resource('/formulario',\App\Http\Controllers\FormularioController::class);
-        Route::resource('/log',\App\Http\Controllers\LogController::class);
-        Route::resource('/profile',\App\Http\Controllers\ProfileController::class);
+        Route::apiResource('cargo',\App\Http\Controllers\CargoController::class);
+        Route::apiResource('tramite',\App\Http\Controllers\TramiteController::class);
+        Route::apiResource('formulario',\App\Http\Controllers\FormularioController::class);
+        Route::apiResource('log',\App\Http\Controllers\LogController::class);
+        Route::apiResource('/profile',\App\Http\Controllers\ProfileController::class);
+        Route::apiResource('/rectificado',\App\Http\Controllers\RectificadoController::class);
+        Route::apiResource('/adjunto',\App\Http\Controllers\AdjuntoController::class);
         Route::post('/unitTramite',[\App\Http\Controllers\TramiteController::class,'unitTramite']); 
         Route::post('/listForm2',[\App\Http\Controllers\FormularioController::class,'listForm2']);
         
@@ -78,5 +80,17 @@ Route::post('/consprop',[\App\Http\Controllers\FormularioController::class,'cons
         Route::post('/retirarRequisito',[\App\Http\Controllers\TramiteController::class,'retirarRequisito']); 
         Route::post('/agregarProceso',[\App\Http\Controllers\TramiteController::class,'agregarProceso']); 
         Route::post('/retirarProceso',[\App\Http\Controllers\TramiteController::class,'retirarProceso']);  
+
+        Route::post('/nextProc',[\App\Http\Controllers\TramiteController::class,'nextProc']); 
+        Route::post('/rechazar',[\App\Http\Controllers\TramiteController::class,'rechazar']);
+
+        Route::post('/upload',[\App\Http\Controllers\UploadController::class,'upload']); 
+        Route::get('/download/{id}',[\App\Http\Controllers\UploadController::class,'download']); 
+        Route::post('/listAdjunto',[\App\Http\Controllers\AdjuntoController::class,'listAdjunto']); 
+         
+        Route::post('/listTramite',[\App\Http\Controllers\FormularioController::class,'listTramite']); 
+        Route::post('/listProcUser',[\App\Http\Controllers\TramiteController::class,'listProcUser']); 
+        Route::post('/cambioUserProc',[\App\Http\Controllers\TramiteController::class,'cambioUserProc']); 
+        
         
 });

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Log;
 use App\Models\User;
 use App\Models\Formulario;
+use App\Models\Tramite;
 use App\Http\Requests\StoreLogRequest;
 use App\Http\Requests\UpdateLogRequest;
 
@@ -33,21 +34,29 @@ class LogController extends Controller
     public function store(StoreLogRequest $request)
     {
         //
-
-        $user2=User::find($request->user_id);
+        $lg=Log::find($request->log_id);
+        $lg->estado='DERIVADO';
+        $lg->save();
+        
+        $norden=$request->orden + 1;
+        $r1=Tramite::with('procesos')->where('id',$request->tramite_id)->first();
+        //return $r1;
+        foreach ($r1->procesos as $value) {
+            if($value->pivot['orden']==$norden){
+                $proceso=$value;
+            }
+        }
         $log=new Log;
         $log->fecha=date('Y-m-d');
         $log->hora=date('H:i:s');
-        $log->obs=$request->obs;
+        $log->orden=$norden;
+        $log->estado='EN PROCESO';
         $log->user_id=$request->user()->id;
         $log->user_id2=$request->user_id;    
         $log->formulario_id=$request->formulario_id;
-        $log->cargo_id=$user2->cargo_id;
+        $log->proceso_id=$proceso->id;
         $log->save();
 
-        $formulario=Formulario::find($request->formulario_id);
-        $formulario->estado='PROCESO';
-        $formulario->save();
     }
 
     public function reasignar(Request $request){
@@ -62,9 +71,10 @@ class LogController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Log $log)
+    public function show($id)
     {
         //
+        return Log::with('proceso')->with('user2')->where('formulario_id',$id)->get();
     }
 
     /**

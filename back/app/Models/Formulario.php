@@ -53,8 +53,12 @@ class Formulario extends Model
         return $this->hasMany(Log::class)->with('user')->with('user2')->with('proceso');
     }
 
+    public function rectificados(){
+        return $this->hasMany(Rectificado::class)->orderBy('id','desc');
+    }
+
     public function latestLog()
     {
-        return $this->hasOne(Log::class)->latestOfMany();
+        return $this->hasOne(Log::class)->with('user2')->with('proceso')->latestOfMany();
     }
 }

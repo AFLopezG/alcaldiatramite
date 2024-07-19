@@ -14,7 +14,7 @@
         <q-toolbar-title>
           <div class="row">
             <div class="">            <img             src="/logo.png"            style="height: 40px; width: 40px;"      /></div>
-            <div class="">GOBIERNO MUNICIPAL DE ORURO <br><div style="font-size:10px">  {{ store.units  }} :  {{ store.cargo.nombre }}</div></div>
+            <div class="" style="font-size: 16px;">GOBIERNO AUTONOMO MUNICIPAL DE ORURO <br><div style="font-size:10px">  {{ store.units  }} :  {{ store.cargo.nombre }}</div></div>
 
 
 
@@ -63,31 +63,38 @@
             >
               <q-item dense clickable v-ripple class="q-pl-xl" to="/asignacion/todo" v-if="store.boolasignacion">
                 <q-item-section avatar>
-                  <q-icon name="source" />
+                  <i class="fa-solid fa-folder-tree"></i>
                 </q-item-section>
                 <q-item-section>TODO</q-item-section>
               </q-item>
               <q-item dense clickable v-ripple class="q-pl-xl" to="/asignacion/proceso">
                 <q-item-section avatar>
-                  <q-icon name="schedule" />
+                  <q-icon name="route" />
                 </q-item-section>
-                <q-item-section>PENDIENTE</q-item-section>
+                <q-item-section>EN PROCESO</q-item-section>
               </q-item>
               <q-item dense clickable v-ripple class="q-pl-xl" to="/asignacion/suspendido">
                 <q-item-section avatar>
-                  <q-icon name="receipt" />
+                  <q-icon name="design_services" />
                 </q-item-section>
-                <q-item-section>SUSPENDIDO</q-item-section>
+                <q-item-section>RECTIFICAR</q-item-section>
               </q-item>
               <q-item clickable v-ripple class="q-pl-xl" to="/asignacion/finalizado">
                 <q-item-section avatar>
-                  <q-icon name="archive" />
+                  <q-icon name="fact_check" />
                 </q-item-section>
                 <q-item-section>FINALIZADO</q-item-section>
+              </q-item>
+              <q-item clickable v-ripple class="q-pl-xl" to="/asignacion/cancelado">
+                <q-item-section avatar>
+                  <q-icon name="cancel" />
+                </q-item-section>
+                <q-item-section>CANCELADO</q-item-section>
               </q-item>
 
 
           </q-expansion-item>
+        <q-expansion-item  active-class="bg-primary text-white" dense exact expand-separator icon="format_list_bulleted" label="Listado Tramites" to="/listado" expand-icon="null" v-if="store.boolseg"/>
         <q-expansion-item  active-class="bg-primary text-white" dense exact expand-separator icon="route" label="Buscar Tramite" to="/seguimiento" expand-icon="null" v-if="store.boolseg"/>
         <q-expansion-item  active-class="bg-primary text-white" dense exact expand-separator icon="summarize" label="Reporte Dia" to="/reporte" expand-icon="null" v-if="store.boolreporte"/>
         <q-expansion-item  active-class="bg-primary text-white" dense exact expand-separator icon="event_available" label="Reporte Anual" to="/reporteAnual" expand-icon="null" v-if="store.boolanual"/>
