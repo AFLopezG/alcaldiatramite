@@ -205,7 +205,7 @@ class TramiteController extends Controller
         $log=Log::find($request->id);
         if($log->user_id2==$request->user_id)
             return false;
-        $log->obs =$log->obs.'// '.$request->motivo;
+        $log->obs =$log->obs.' * '.$request->motivo;
         $log->estado='CAMBIO';
         $log->save();
 
@@ -226,7 +226,7 @@ class TramiteController extends Controller
         //return $request;
 
         $log= Log::find($request->latest_log['id']);
-        $log->obs=$log->obs.'// '.$request->comentario;
+        $log->obs=$log->obs.' * '.$request->comentario;
         $log->estado='RECHAZADO';
         $log->save();
         

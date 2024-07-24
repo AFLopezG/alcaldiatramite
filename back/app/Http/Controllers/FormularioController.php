@@ -144,7 +144,7 @@ class FormularioController extends Controller
             if( $canTram < 1)
                 $numero=1;
             else{
-                $numero = $canTram + 1; 
+                $numero = Formulario::where('unit_id',$tramite->unit_id)->where('gestion',$gestion)->where('tramite_id',$request->tramite_id)->max('numero') + 1; 
             }            
         }
         else
@@ -153,7 +153,7 @@ class FormularioController extends Controller
             $gestion = $request->gestion; 
         }
 
-        if(!isset($request->delegado['cedula']) && !isset($request->delegado['nombre'])){
+        if(isset($request->delegado['cedula']) && isset($request->delegado['nombre'])){
             if(isset($request->delegado['id']))
             {
                 $delegado=Delegado::find($request->delegado['id']);
@@ -241,6 +241,29 @@ class FormularioController extends Controller
             $propietario->save();
         }
 
+        if(isset($request->delegado['cedula']) && isset($request->delegado['nombre'])){
+            if(isset($request->delegado['id']))
+            {
+                $delegado=Delegado::find($request->delegado['id']);
+                $delegado->cedula=$request->delegado['cedula'];
+                $delegado->nombre=$request->delegado['nombre'];
+                $delegado->celular=$request->delegado['celular'];
+                $delegado->save();
+            }
+            else{
+                $delegado= new Delegado();
+                $delegado->cedula=$request->delegado['cedula'];
+                $delegado->nombre=$request->delegado['nombre'];
+                $delegado->celular=$request->delegado['celular'];
+                $delegado->save();
+            }
+            $delegado_id=$delegado->id;
+        }
+        else{
+            $delegado_id=null;
+        }
+
+        
         $f1=Formulario::find($request->id);
         if($f1->numero==$request->numero && $f1->gestion==$request->gestion && $f1->tramite_id==$request->tramite_id){
             $numero = $request->numero;
@@ -250,21 +273,23 @@ class FormularioController extends Controller
                 
         if($request->numero == null){
             $gestion = date('Y'); 
-            if(Formulario::where('unit_id',$tramite->unit_id)->where('gestion',$gestion)->where('tramite_id',$request->tramite_id)->count()>=0)
+            if(Formulario::where('unit_id',$tramite->unit_id)->where('gestion',$gestion)->where('tramite_id',$request->tramite_id)->count()==0)
                 $numero=1;
             else
             {
-            $form = Formulario::where('unit_id',$tramite->unit_id)->where('gestion',$gestion)->where('tramite_id',$request->tramite_id)->count();
-            $numero = $form->numero + 1; }  
+            $form = Formulario::where('unit_id',$tramite->unit_id)->where('gestion',$gestion)->where('tramite_id',$request->tramite_id)->max('numero');
+            $numero = $form + 1; }  
         }
         else
         {
             $numero=$request->numero;
             $gestion = $request->gestion; 
         }
+
         if(Formulario::where('numero',$numero)->where('gestion',$gestion)->where('unit_id',$unit->id)->where('tramite_id',$request->tramite_id)->count()>0)
         return response(['message' => 'YA SE ENCUENTRA REGISTRADO'],500);
     }
+
 
         $formulario=Formulario::find($request->id);
         $formulario->numero=$numero;
@@ -272,20 +297,16 @@ class FormularioController extends Controller
         $formulario->codigo=$tramite->codigo.'-'.$unit->codigo.str_pad($request->numero, 6, '0', STR_PAD_LEFT).'/'.substr($gestion,2,2);
         $formulario->codtram=str_pad($request->numero, 4, '0', STR_PAD_LEFT).'/'.substr($gestion,2,2);
         $formulario->distrito=$request->distrito;
-        $formulario->gestorci=strtoupper($request->gestorci);
-        $formulario->gestornom=strtoupper($request->gestornom);
-        $formulario->gestorcel=$request->gestorcel;
         $formulario->detalle=$request->detalle;
-        $formulario->observacion=$request->observacion;
-        $formulario->estado='PROCESO';
+        $formulario->estado='EN PROCESO';
 
         $formulario->fecha=date('Y-m-d');
         $formulario->hora=date('H:i:s');
         $formulario->propietario_id=$propietario->id;
         $formulario->tramite_id=$request->tramite_id;
+        $formulario->delegado_id=$delegado_id;
         $formulario->unit_id=$unit->id;
         $formulario->user_id=$request->user()->id;
-        $formulario->cargo_id=$request->user()->cargo_id;
         $formulario->save();
 
         return $formulario;
@@ -435,76 +456,28 @@ class FormularioController extends Controller
         //
     }
 
-    public function reporteDiaIng(Request $request){
-        return DB::SELECT("SELECT f.codtram codigo,t.nombre tramite,p.nombre,p.apellido
-        FROM formularios f inner join logs l on f.id=l.formulario_id
-        INNER join propietarios p on f.propietario_id=p.id
-        inner join tramites t on t.id=f.tramite_id
-        where l.fecha='$request->fecha' and l.user_id2=".$request->user()->id." 
-        group by f.codtram,tramite,p.nombre,p.apellido
-        order by t.nombre;");
 
-     }
 
-     public function reporteDiaDerv(Request $request){
-        return DB::SELECT("SELECT f.codtram codigo,t.nombre tramite,p.nombre,p.apellido
-        FROM formularios f inner join logs l on f.id=l.formulario_id
-        INNER join propietarios p on f.propietario_id=p.id
-        inner join tramites t on t.id=f.tramite_id
-        where l.fecha='$request->fecha' and l.user_id=".$request->user()->id." 
-        group by f.codtram,tramite,p.nombre,p.apellido
-        order by t.nombre;");
-     }
 
-     public function reportEstado(Request $request){
-        $listlog=DB::SELECT("SELECT max(id) id,formulario_id
-        from logs
-        where formulario_id in (SELECT l2.formulario_id 
-                    from logs l2 inner join formularios f on f.id=l2.formulario_id
-                    where l2.user_id2=".$request->user()->id." 
-                     and f.deleted_at is null )
-        
-        GROUP by formulario_id order by id desc");
-        //return $listlog;
-        $list=[];
-        foreach ($listlog as $r) {
-            array_push($list,$r->formulario_id);
-        }
-        //return $list;
-        //return Formulario::whereIn('id', $list)->get();
-        return DB::table('formularios')
-                 ->select('tramites.nombre','formularios.estado', DB::raw('count(*) as total'))
-                 ->join('tramites', 'tramites.id', '=', 'formularios.tramite_id')
-                 ->whereIn('formularios.id', $list)
-                 ->whereIn('formularios.estado',['PROCESO','SUSPENDIDO'])
-                 ->groupBy('tramites.nombre','formularios.estado')
-                 ->orderBy('formularios.estado')
-                 ->get();
-       
-     }
 
-     public function reportAsig(Request $request){
-        return DB::SELECT("SELECT count(*) cantidad, t.nombre tramite
-        from formularios f inner join tramites t on f.tramite_id=t.id
-        where f.id in (select l.formulario_id from logs l 
-                        where l.fecha>='$request->fecha1' and l.fecha<='$request->fecha2'
-                        and l.user_id2=".$request->user()->id." GROUP by l.formulario_id) 
-        
-        group BY t.nombre;");
-     }
 
      public function listForm(Request $request){
-        $cedula=$request->cedula;
-        $comp=$request->complemento;
+        $searchtext=$request->searchtext;
+        $resul=DB::SELECT("SELECT f.id 
+        from formularios f inner join tramites t on f.tramite_id=t.id inner join propietarios p on f.propietario_id=p.id
+        where f.codigo like '%$searchtext%' or p.cedula like '%$searchtext%' or p.nombre like '%$searchtext%' or p.apellido like '%$searchtext%' limit 15; ");
 
-        if($comp==null) 
-        $comp='';
+        $list=[];
+        foreach ($resul as $value) {
+            # code...
+            array_push($list,$value->id);
+        }
+        //return $resul;
+        return Formulario::with('tramite')->with('propietario')->whereIn('id',$list)->get();
+    
+        
 
-        return Propietario::where('cedula',$cedula)->where('complemento',$comp)
-        ->with(['formularios'=>function($query2){
-            $query2->orderBy('id','desc');
-        }])
-        ->first();
+
     } 
     
     public function listForm2(Request $request){
@@ -527,16 +500,7 @@ class FormularioController extends Controller
         }] )->first();
      }
 
-     public function reporteFinalizado(Request $request){
-        return DB::SELECT("SELECT f.codtram codigo,t.nombre tramite,p.nombre,p.apellido
-        FROM formularios f inner join logs l on f.id=l.formulario_id
-        INNER join propietarios p on f.propietario_id=p.id
-        inner join tramites t on t.id=f.tramite_id
-        where l.fecha>='$request->ini' and l.fecha<='$request->fin' 
-        and l.user_id=".$request->user()->id." 
-        and f.estado='FINALIZADO' group by f.codtram,tramite,p.nombre,p.apellido
-        order by t.nombre;");
-     }
+
 
     public function printRuta($id){
         $cadena='';

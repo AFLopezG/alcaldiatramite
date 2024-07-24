@@ -17,7 +17,7 @@
         </template>
 
       </q-table>
-      <q-table dense :filter="filter2" title="LISTADO DE TRAMITES INGRESAN" :rows="reportes" :columns="columns" row-key="name" :rows-per-page-options="[50,100]">
+      <q-table dense :filter="filter2" title="LISTADO DE TRAMITES ASIGNADO" :rows="reportes" :columns="columns" row-key="name" :rows-per-page-options="[50,100]">
         <template v-slot:top-right>
           <div class="q-pa-xs"><q-btn color="blue-6" icon="print" @click="impresion" /></div>
           <q-input outlined dense debounce="300" v-model="filter2" placeholder="Search">
@@ -49,7 +49,7 @@
       </q-table>
         <div>
           <q-table
-            title="Total por tramite"
+            title="TOTAL POR TRAMITE"
             :rows="report2"
             row-key="name"
             :filter="filter4"

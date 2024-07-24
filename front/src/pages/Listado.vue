@@ -17,7 +17,7 @@
             </template>
             <template v-slot:body-cell-op="props">
                 <q-td  :props="props" >
-                  <q-btn color="info" icon="change_circle" dense flat  @click="listUser(props.row)"/> 
+                  <q-btn color="info" icon="change_circle" dense flat  @click="listUser(props.row)" v-if="validaAdmin"/> 
                   <q-btn color="indigo" icon="timeline" dense flat  @click="getHistorial(props.row)"/> 
                 </q-td>
             </template>
@@ -50,7 +50,7 @@
         </q-dialog>
 
         <q-dialog v-model="dialogHist" >
-            <q-card style="width: 700px; max-width: 80vw;">
+            <q-card style="width: 700px; max-width: 100%;">
                 <q-card-section class="row items-center">
                     <q-avatar icon="timeline" color="primary" text-color="white" size="sm"   />
                     <span class="q-ml-sm">HISTORIAL DE ENVIOS.</span>
@@ -59,7 +59,7 @@
                     <q-timeline layout="comfortable" side="right" color="secondary" style="font-size: 12px;" dense>
                         <q-timeline-entry
                             :title="hist.proceso.nombre"
-                            :subtitle="hist.fecha"
+                            :subtitle="hist.fecha +' '+ hist.hora"
                             side="left"
                             :icon="hist.estado=='EN PROCESO'?'engineering':''"
                             v-for="hist in historial" :key="hist"
@@ -82,10 +82,14 @@
 </template>
 <script>
 import moment from 'moment';
+import { globalStore } from '../stores/globalStore'
+
 export default {
     name:'listadoPage',
     data() {
         return {
+            store: globalStore(),
+            validaAdmin:false,
             dialogHist:false,
             historial:[],
             motivo:'',
@@ -112,6 +116,14 @@ export default {
     },
     mounted(){
         this.getTramite()
+
+    },
+    created(){
+        console.log(this.store.profiles)
+        this.validaAdmin=false
+        this.store.profiles.forEach( t => {
+            if(t.prof=='ADMINISTRADOR') this.validaAdmin=true
+        });
     },
     methods:{
         getHistorial(dato){
@@ -159,7 +171,6 @@ export default {
                 this.listado=res.data
                 console.log(this.listado)
             })
-
         }
     }
 }

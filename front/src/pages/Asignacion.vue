@@ -121,6 +121,7 @@
 
             <template  v-slot:body-cell-opciones="props">
                 <q-td auto-width key="opciones" :props="props" style="text-align:center">
+                    <q-btn color="amber" icon="edit" flat size="sm" @click="modificar(props.row)" v-if="props.row.latest_log.user_id==null"><q-tooltip >MODIFICAR DATOS</q-tooltip></q-btn>
                     <q-btn color="indigo" flat icon="file_open" dense :to="'/vertramite/'+props.row.id+'/'+props.row.tramite.id" v-if="props.row.estado=='EN PROCESO' || props.row.estado=='RECTIFICAR'"/>
                     <div :style="'font-weight: bold;font-size: 10px; color:'+props.row.color" >{{ props.row.estado }}</div>
               
@@ -425,6 +426,13 @@ import es from 'javascript-time-ago/locale/es'
         console.log(prop)
         this.crear=true;
         this.dato=prop;
+        if(this.dato.delegado!=null) 
+          this.delegado=this.dato.delegado
+        else 
+          this.delegado={}
+        this.propietario=this.dato.propietario
+        this.tramite=this.dato.tramite
+        this.tramite.label=this.tramite.nombre
       },
       quitardestinatario(i){
         this.dest.splice(i,1)
@@ -654,7 +662,7 @@ import es from 'javascript-time-ago/locale/es'
             this.$api.post('/updateform',this.dato).then(()=>{
               this.dato={gestion:date.formatDate(Date.now(),'YYYY')};
               this.crear=false
-              this.misdatos(this.pagination.page,this.filter,this.pagination.rowsPerPage)
+              this.misdatos()
               this.getGestor()
             }).catch(err=>{
               console.log(err)

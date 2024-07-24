@@ -58,15 +58,15 @@ Route::post('/consprop',[\App\Http\Controllers\FormularioController::class,'cons
         Route::post('/finalizar',[\App\Http\Controllers\FormularioController::class,'finalizar']);
 
         Route::post('/updateform',[\App\Http\Controllers\FormularioController::class,'updateform']);
-        Route::post('/reporteDiaIng',[\App\Http\Controllers\FormularioController::class,'reporteDiaIng']);
-        Route::post('/reporteDiaDerv',[\App\Http\Controllers\FormularioController::class,'reporteDiaDerv']);
+        Route::post('/reporteDiaIng',[\App\Http\Controllers\ReporteController::class,'reporteDiaIng']);
+        Route::post('/reporteDiaDerv',[\App\Http\Controllers\ReporteController::class,'reporteDiaDerv']);
+        Route::post('/reporteFinalizado',[\App\Http\Controllers\ReporteController::class,'reporteFinalizado']);
+        Route::post('/reportAsig',[\App\Http\Controllers\ReporteController::class,'reportAsig']);
+        Route::post('/reportEstado',[\App\Http\Controllers\ReporteController::class,'reportEstado']);
 
         Route::post('/consulta2',[\App\Http\Controllers\FormularioController::class,'consulta2']);
         Route::post('/habilitar',[\App\Http\Controllers\FormularioController::class,'habilitar']);
 
-        Route::post('/reportAsig',[\App\Http\Controllers\FormularioController::class,'reportAsig']);
-        Route::post('/reportEstado',[\App\Http\Controllers\FormularioController::class,'reportEstado']);
-        Route::post('/reporteFinalizado',[\App\Http\Controllers\FormularioController::class,'reporteFinalizado']);
         Route::post('/reportAnual1',[\App\Http\Controllers\FormularioController::class,'reportAnual1']);
         Route::post('/reportAnual2',[\App\Http\Controllers\FormularioController::class,'reportAnual2']);
 

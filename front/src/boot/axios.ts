@@ -28,6 +28,7 @@ export default boot(({ app, router }) => {
     api.post('me').then((response) => {
       console.log(response.data)
       globalStore().user = response.data
+      globalStore().profiles = response.data.profiles 
       globalStore().units = '' 
       globalStore().cargo = response.data.cargo
       globalStore().isLoggedIn = true
@@ -49,6 +50,7 @@ export default boot(({ app, router }) => {
       globalStore().user={}
       globalStore().units=''
       globalStore().cargo={}
+      globalStore().profiles=[]
       localStorage.removeItem('tokenTerri')
       globalStore().isLoggedIn=false
       globalStore().booluser=false
@@ -65,6 +67,7 @@ export default boot(({ app, router }) => {
     globalStore().user={}
     globalStore().units=''
     globalStore().cargo={}
+    globalStore().profiles=[]
     globalStore().isLoggedIn=false
     globalStore().booluser=false
     globalStore().boolregistro=false

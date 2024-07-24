@@ -6,6 +6,7 @@ export const globalStore = defineStore('global', {
     user: {},
     units: '',
     cargo: {},
+    profiles: [],
     isLoggedIn: !!localStorage.getItem('tokenTerri'),
 
     booluser: false,

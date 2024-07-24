@@ -104,6 +104,7 @@ import {globalStore} from 'stores/globalStore'
           this.store.user = res.data.user
           this.store.units = ''
           this.store.cargo = res.data.user.cargo
+          this.store.profiles = res.data.user.profiles
           this.store.isLoggedIn = true
           res.data.user.units.forEach(r => {
 			this.store.units += ' * ' +r.nombre 
