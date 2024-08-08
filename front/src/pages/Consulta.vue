@@ -15,9 +15,8 @@
       <q-page>
     <div class="text-h5 text-center text-bold">SEGUIMIENTO DE TRAMITE</div>
         <div class="row " align="center">
-        <div class="col-md-3 col-xs-6 q-pa-xs"> <q-input v-model="buscar.cedula" type="number" label="Numero de Carnet" outlined dense  /> </div>
-        <div class="col-md-2 col-xs-4 q-pa-xs"> <q-input  v-model="buscar.complemento" label="Complemento" outlined dense  placeholder="XX" hint="si tiene"  /> </div>
-        <div class="col-md-3 col-xs-2">
+        <div class="col-md-9  q-pa-xs"> <q-input v-model="codigo" label="Codigo / Cedula / Nombre" outlined dense  /> </div>
+        <div class="col-md-3 ">
             <q-btn color="info" icon="search"  @click="buscarTramite()" dense/>
         </div>
         </div>
@@ -38,41 +37,49 @@
           >
           <template v-slot:body-cell-op="props">
             <q-td key="op" :props="props">
-                <q-btn color="info" icon="visibility" size="xs" @click="conLog(props.row)"  />
+                <q-btn color="info" icon="visibility" size="xs" @click="getHistorial(props.row)"  />
             </q-td>
 
         </template>
         </q-table>
 
         </div>
-        <div class="q-pa-md" v-if="formulario.id!=undefined">
-            <b>TRAMITE: </b> {{ formulario.tramite.nombre }} <br>
-            <b>CODIGO: </b> {{ formulario.codigo }} <br>
-            <b>DETALLE: </b> {{ formulario.detalle }} <br>
-            <b>OBSERVACION: </b> {{ formulario.observacion }}
-        </div>
-        <div class="col-12" v-if="formulario.id!=undefined">
-          <q-table
-            dense
-            table-header-style="background-color: #009e91;"
-            title="Seguimiento Tramite"
-            :rows="formulario.logs"
-            :columns="columns"
-            :filter="filter"
-            :loading="loading"
-            :rows-per-page-options="[10,100,150,200,0]"
-             row-key="name">
-            <template v-slot:top-right>
-              <q-input outlined bottom-slots dense debounce="300" v-model="filter" @keyup.enter="buscar" placeholder="Buscar">
-                <template v-slot:append>
-                  <q-icon v-if="filter !== ''" name="close" @click="actualizar" class="cursor-pointer" />
-                  <q-icon name="search" />
-                </template>
-              </q-input>
-            </template>
-          </q-table>
-        </div>
+
+
       </div>
+      <q-dialog v-model="dialogHist" >
+            <q-card style="width: 700px; max-width: 100%;">
+                <q-card-section class="row items-center">
+                    <q-avatar icon="timeline" color="primary" text-color="white" size="sm"   />
+                    <span class="q-ml-sm">HISTORIAL DE ENVIOS {{ formulario.codigo }}</span>
+                </q-card-section>
+                <q-card-section style="max-height: 60vh" class="scroll">
+                  <div>Tramite: {{ formulario.tramite.nombre }}</div>
+                  <div>Propietario: {{ formulario.propietario.nombre }} {{ formulario.propietario.apellido }}</div>
+                    <q-timeline layout="comfortable" side="right" color="secondary" style="font-size: 12px;" dense>
+                        <q-timeline-entry
+                            :title="hist.proceso.nombre"
+                            :subtitle="hist.fecha +' '+ hist.hora"
+                            side="left"
+                            :icon="hist.estado=='EN PROCESO'?'engineering': hist.estado=='CANCELADO'?'block':hist.estado=='FINALIZADO'?'check_circle_outline':''"
+                            :color="hist.color"
+                            v-for="hist in historial" :key="hist"
+                            
+                        >
+                            <div>
+                                <span>{{ hist.user2.name }}</span><br>
+                                <q-badge :color="hist.color"  text-color="{2:black}" :label=" hist.estado " dense/> <br>
+                                {{ hist.obs }}
+                            </div>
+                        </q-timeline-entry>
+                    </q-timeline>
+                </q-card-section>
+                <q-card-actions align="right">
+                    <q-btn flat label="Cancelar" color="red" v-close-popup dense />
+                </q-card-actions>
+            </q-card>
+        </q-dialog>
+
        </q-page>
       </q-page-container>
     </q-layout>
@@ -82,8 +89,17 @@
   import {date} from 'quasar';
   export default defineComponent({
   name: 'ConsultaPage',
+    props: {
+      param: {
+        type: String,
+        default: ''
+      }
+    },
     data(){
       return {
+        codigo:'',
+        dialogHist:false,
+        historial:{},
         buscar: {'gestion':date.formatDate(Date.now(),'YYYY'),'oficina':'CU'},
         propietario:{},
         tramites:[],
@@ -114,17 +130,36 @@
         loading:false
       }
     },
+    created(){
+      console.log(this.$route.params.codigo )
+      let ar=this.$route.params.codigo || ''
+      if(ar!='' && ar.length==2){
+        this.codigo=ar[0]+'/'+ar[1]
+        this.buscarTramite()
+      }
+      else
+        this.codigo=''
+      console.log(this.codigo)
+    },
 
     methods:{
-      conLog(tram){
-        console.log(tram)
-        //return false
-        this.$api.post('consprop',{'id': tram.id}).then((res) => {
-            console.log(res.data)
-            this.formulario=res.data
-        })
-
-      },
+      getHistorial(dato){
+        this.formulario=dato
+            this.$api.get('log/'+dato.id).then((res) => { 
+                console.log(res.data)
+                res.data.forEach( r => {
+                    r.color='black'
+                    if(r.estado=='EN PROCESO') r.color='green'
+                    if(r.estado=='RECTIFICAR' || r.estado=='CANCELADO' || r.estado=='RECHAZADO') r.color='red'
+                    if(r.estado=='FINALIZADO') r.color='green'
+                    if(r.estado=='DERIVADO') r.color='indigo'
+                    if(r.estado=='CAMBIO') r.color='amber-8'
+                    
+                });
+                this.historial=res.data
+                this.dialogHist=true
+            })           
+        },
         getTramites(){
         this.tramites=[]
         this.$api.get('listramite').then((res) => {
@@ -136,28 +171,21 @@
         })
       },
       buscarTramite(){
-        this.formulario=[]
-        if(this.buscar.cedula==undefined)
+        if(this.codigo==undefined || this.codigo=='')
             return false
 
-         this.$api.post('listForm',this.buscar).then((res) => {
-          console.log(res.data)
-            if(res.data=='')
+         this.$api.post('listForm',{searchtext:this.codigo}).then((res) => {
+            this.formularios=[]
+            if(res.data==''){
             this.$q.notify({
-            message: 'EL NUMERO DE CARNET NO EXISTE',
+            message: 'NO EXISTE NINGUN REGISTRO',
             color: 'negative',
             position: 'top',
             icon:'info'
-            })
-            this.propietario=res.data
-            this.formularios=res.data.formularios
-            if(this.formularios.length == 0 )
-              this.$q.notify({
-              message: 'No tiene Tramites Vigentes',
-              color: 'negative',
-              position: 'top',
-              icon:'info'
-              })
+            })}
+            else
+            this.formularios=res.data
+
         })
       },
 

@@ -73,7 +73,7 @@
                 </q-item-section>
                 <q-item-section>EN PROCESO</q-item-section>
               </q-item>
-              <q-item dense clickable v-ripple class="q-pl-xl" to="/asignacion/suspendido">
+              <q-item dense clickable v-ripple class="q-pl-xl" to="/asignacion/rectificar">
                 <q-item-section avatar>
                   <q-icon name="design_services" />
                 </q-item-section>

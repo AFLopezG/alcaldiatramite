@@ -110,18 +110,24 @@
                 </q-td>
             </template>
 
+            <template v-slot:body-cell-retrazo="props">
+                <q-td  :props="props" >
+                  <q-badge style="height: 25px;" :color="props.row.retrazo>0?'red':'amber'" text-color="{2:black}" :label="'Retrazo '+props.row.retrazo+' dias'" size="lg" :style="props.row.retrazo>0?'font-size:18px':''"/>
+                </q-td>
+            </template>
 
             <template v-slot:body-cell-codigo="props">
                 <q-td  :props="props" >
                   {{ props.row.codigo }}
                   <br>
-                  <q-btn size="xs" color="green" flat label="Hoja Ruta" @click="impRuta(props.row.id)" />
+                  <q-btn size="xs" color="green" flat label="Hoja Ruta" @click="impRuta(props.row)" />
+                  <q-btn size="xs" color="indigo-4" flat label="Ticket" @click="impresionTicket(props.row)" />
                 </q-td>
             </template>
 
             <template  v-slot:body-cell-opciones="props">
                 <q-td auto-width key="opciones" :props="props" style="text-align:center">
-                    <q-btn color="amber" icon="edit" flat size="sm" @click="modificar(props.row)" v-if="props.row.latest_log.user_id==null"><q-tooltip >MODIFICAR DATOS</q-tooltip></q-btn>
+                    <q-btn color="amber" icon="edit" flat size="sm" @click="modificar(props.row)" v-if="props.row.latest_log.user_id==null && props.row.estado=='EN PROCESO'"><q-tooltip >MODIFICAR DATOS</q-tooltip></q-btn>
                     <q-btn color="indigo" flat icon="file_open" dense :to="'/vertramite/'+props.row.id+'/'+props.row.tramite.id" v-if="props.row.estado=='EN PROCESO' || props.row.estado=='RECTIFICAR'"/>
                     <div :style="'font-weight: bold;font-size: 10px; color:'+props.row.color" >{{ props.row.estado }}</div>
               
@@ -218,8 +224,8 @@
                 <div class="text-h6"> <q-icon name="list"/> Datos de Formulario</div>
               </q-card-section>
               <q-card-section class="q-pt-none">
-                <div><b>Codigo: </b> {{ informacion.codigo}} <b>Tramite: </b> {{ informacion.tramite}}</div>
-                <div><b>Propietario: </b> {{ informacion.propietario.nombre }} {{ informacion.propietario.apellido }} <b> Cedula :</b> {{ informacion.cedula}} {{ informacion.complemento }}</div>
+                <div><b>Codigo: </b> {{ informacion.codigo}} <b>Tramite: </b> {{ informacion.tramite.nombre}}</div>
+                <div><b>Propietario: </b> {{ informacion.propietario.nombre }} {{ informacion.propietario.apellido }} <b> Cedula :</b> {{ informacion.propietario.cedula}} {{ informacion.propietario.complemento }}</div>
                 <div><b>Estado: </b> {{ informacion.estado}}</div>
                 <div><b>Detalle: </b>{{ informacion.detalle}}</div>
                 <div><b>Observacion: </b>{{ informacion.observacion}}</div>
@@ -243,11 +249,16 @@ import { globalStore } from '../stores/globalStore'
 import {Printd} from 'printd'
 import TimeAgo from 'javascript-time-ago'
 import es from 'javascript-time-ago/locale/es'
+import QRCode from 'qrcode'
+import moment from 'moment';
 
+TimeAgo.addDefaultLocale(es)
+const timeAgo = new TimeAgo('es-ES')
   export default {
     name: 'AsignacionPage',
     data(){
       return {
+        urlticket:'http://181.115.235.114:90/',
         store: globalStore(),
         delegado:{},
         propietario:{},
@@ -297,6 +308,7 @@ import es from 'javascript-time-ago/locale/es'
           {name:'propietario',field:row=> row.propietario.nombre +' '+row.propietario.apellido,label:'PROPIETARIO',align:'left'},
           {name:'fecha',field: row=>row.latest_log.fecha, label:'FECHA',align:'left'},
           {name:'datos',field: 'datos',label:'DATOS',align:'left'},
+          {name:'retrazo',field: 'retrazo',label:'RETRAZO',align:'left'},
           {name:'dias',field: 'dias',label:'PLAZO',align:'left'},
         ],
         pagination:{
@@ -309,7 +321,19 @@ import es from 'javascript-time-ago/locale/es'
         formularios:[],
         formulario:{},
         loading:false,
-        current:1
+        current:1,
+        opts : {
+        errorCorrectionLevel: 'M',
+        type: 'png',
+        quality: 0.95,
+        width: 60,
+        margin: 1,
+        color: {
+          dark: '#000000',
+          light: '#FFF',
+        },
+        qrImage:''
+      }
       }
     },
     computed:{
@@ -333,6 +357,69 @@ import es from 'javascript-time-ago/locale/es'
       console.log('tipo de asignacion:  ',this.tipoasignacion)
     },
     methods:{
+      async impresionTicket(frm){
+        console.log(frm)
+        let opts = {
+        errorCorrectionLevel: 'M',
+        type: 'png',
+        quality: 0.95,
+        width: 80,
+        margin: 1,
+        color: {
+          dark: '#000000',
+          light: '#FFF'}}
+        let url=this.urlticket+'#/consulta/'+frm.codigo
+        let qrImage = await QRCode.toDataURL( url, opts)
+        let cadena=`<style>
+        .tab1{
+        width:100%
+        }
+        .titulo1{
+        font-size:12px;
+        font-weight: bold;
+        text-align:center;
+        }
+        .titulo2{
+        font-size:10px;
+        font-weight: bold;
+        text-align:center;
+        }
+        .titulo3{
+        font-size:10px;
+        font-weight: normal;
+        text-align:center;
+        }
+       .tab2{
+        width:100%;
+        border-collapse: collapse;
+        font-size:10px;
+        }
+        .tab2 th{
+        text-align:right;
+        }
+        .pie{
+        font-size:10px;
+        font-style: italic;
+        text-align:center;
+        }
+        </style>
+        <div style='font-family: Arial, Helvetica, sans-serif;'>
+        <table><tr><td style='width:20%'><img src='gamo.jpg' style='width:50px'></td><td class='titulo1'>GOBIERNO AUTONOMO MUNICIPAL DE ORURO</td></tr></table>
+        
+        <div class='titulo2'>`+frm.tramite.unit.nombre+`</div>
+        <div class='titulo3'>`+frm.tramite.nombre+`</div> <br>
+        <table class='tab2'>
+          <tr><th>TRAMITE:</th> <td>`+frm.codigo+`</td></tr>
+          <tr><th>FECHA:</th><td>`+frm.fecha+' '+frm.hora+`</td></tr>
+          <tr><th>PROPIETARIO:</th><td>`+frm.propietario.nombre+' '+frm.propietario.apellido+`</td></tr>
+        </table><br>
+        <div style='text-align:center'><img src='`+qrImage+`'></div><br>
+        <div class='pie'>Orureños Trabajando para Orureños </div>
+        </div>`
+        document.getElementById('myelement').innerHTML = cadena
+        const d = new Printd()
+        d.print( document.getElementById('myelement') )
+      },
       cambio(){
       this.delegado.nombre=''
       this.delegado.celular=''
@@ -487,8 +574,7 @@ import es from 'javascript-time-ago/locale/es'
         this.loading=true
         this.$api.post('micorreo',{estado:this.tipoasignacion}).then(res=>{
             console.log(res.data)
-          TimeAgo.addDefaultLocale(es)
-          const timeAgo = new TimeAgo('es-ES')
+
           res.data.forEach(r => {
             const dias = timeAgo.format(Date.parse( r.latest_log.fecha + ' ' + r.latest_log.hora))
             r.dias=dias
@@ -496,7 +582,9 @@ import es from 'javascript-time-ago/locale/es'
               if(r.estado=='EN PROCESO') r.color='green'
               if(r.estado=='CANCELADO'||r.estado=='RECTIFICAR') r.color='red'
               if(r.estado=='FINALIZADO') r.color='indigo'
-              
+              r.fechafin=moment(r.latest_log.fecha +' '+r.latest_log.hora).add(parseInt(r.latest_log.proceso.dias), 'days').format('YYYY-MM-DD')
+              r.retrazo=(Math.round(moment.duration(moment().diff(r.fechafin)).asDays()))
+              if(r.retrazo<1 || r.estado=='CANCELADO' || r.estado=='FINALIZADO') r.retrazo=0
           });
           this.formularios=res.data
           this.loading=false
@@ -570,10 +658,17 @@ import es from 'javascript-time-ago/locale/es'
       }
        )
     },
-      impRuta(id){
-        this.$api.get('/printRuta/'+id).then((res)=>{
+      async impRuta(frm){
+        let qrtext=frm.codigo + '\n'
+        + date.formatDate(Date.now(),'YYYY-MM-DD HH:mm:ss')+ '\n'
+        + frm.estado +'\n'
+        + this.store.user.name
+        this.qrImage = await QRCode.toDataURL( qrtext, this.opts)
+        let cadena="<div style='position:relative;'><img style='position:absolute; top=0px; right:0px' src='" + this.qrImage + "' ></div>"
+        this.$api.get('/printRuta/'+frm.id).then((res)=>{
           if(res.data!=''){
-          document.getElementById('myelement').innerHTML = res.data
+            cadena+=res.data
+          document.getElementById('myelement').innerHTML = cadena
       const d = new Printd()
       d.print( document.getElementById('myelement') )
           }

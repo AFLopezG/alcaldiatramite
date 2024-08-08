@@ -1,6 +1,6 @@
 <template>
     <q-page class="q-pa-sm contenido">
-        <q-stepper v-model="tab" flat animated color="indigo" active-color="indigo" style="margin:0; padding:0">
+        <q-stepper v-model="tab" flat animated color="indigo" active-color="indigo" style="margin:0; padding:0" >
             <q-step v-for="pr in tramite.procesos" :key="pr.pivot.orden" :name="pr.pivot.orden" :title="pr.nombre" :prefix="pr.pivot.orden" style="min-height: 5px;margin:0; padding:0"/>
         </q-stepper>
 
@@ -9,8 +9,9 @@
             <div class="text-bold q-pa-xs text-center" style="font-size: 14px;" >DATOS DE TRAMITE : {{ formulario.codigo }} <span style="color:red; font-size: 18px;" v-if="formulario.estado=='RECTIFICAR' || formulario.estado=='CANCELADO'">{{ formulario.estado }}</span></div>
         <div class="row" >
             <div class="col-md-6 col-xs-12"> <b class="q-pa-xs">TRAMITE : </b> {{ tramite.nombre }}</div> 
-            <div class="col-md-3 col-xs-6"><b class="q-pa-xs">FECHA ING: </b>{{ formulario.fecha }}</div>
-            <div class="col-md-3 col-xs-6" v-if="formulario.distrito!='' || formulario.distrito!=null"><b class="q-pa-xs">DISTRITO :  </b>{{ formulario.distrito }}</div>
+            <div class="col-md-2 col-xs-4"><b class="q-pa-xs">FECHA ING: </b>{{ formulario.fecha }}</div>
+            <div class="col-md-2 col-xs-4" v-if="formulario.distrito!='' || formulario.distrito!=null"><b class="q-pa-xs">DISTRITO :  </b>{{ formulario.distrito }}</div>
+            <div class="col-md-2 col-xs-4"><q-btn color="indigo-4" icon="edit_note" label="Observacion" @click="dialogComentario=true" size="sm" v-if="formulario.estado=='EN PROCESO'"><q-tooltip>OPCIONAL Comentario</q-tooltip></q-btn></div>
             <div class="col-md-12 col-xs-12"><b class="q-pa-xs">DETALLE: </b>{{ formulario.detalle }}</div>
         </div>
         </q-card-section>
@@ -34,7 +35,7 @@
     </div>
         </q-card-section>
     </q-card>
-    <div >
+    <div>
     
      <div class="row">
         <div class="col-6">
@@ -95,7 +96,7 @@
                 <div class="col-md-2" v-if="formulario.estado=='RECTIFICAR'"><q-btn glossy no-caps color="amber-10" icon="question_mark" label="CONTINUAR" @click="dialogCont=true"  dense ><q-tooltip >Regularizado Observacion</q-tooltip></q-btn></div>
                 <div class="col-md-2" v-if="tab>1 && formulario.estado=='EN PROCESO'"><q-btn glossy no-caps color="red-7" icon="keyboard_return" label="RECHAZAR" @click="devolver()"  dense ><q-tooltip>Devuelve al anterior</q-tooltip></q-btn></div>
                 <div class="col-md-2" v-if="formulario.estado=='EN PROCESO'"><q-btn glossy no-caps color="red-10" icon="archive" label="RECTIFICAR"  @click="observar()" dense> <q-tooltip >Informacion Incompleta o Erronea</q-tooltip></q-btn></div>
-                <div class="col-md-2" v-if="derivar=={} && formulario.estado=='EN PROCESO'"><q-btn glossy no-caps color="orange-8" icon="archive" label="FINALIZAR"   dense> <q-tooltip>Ha terminado Correctamente</q-tooltip></q-btn></div>
+                <div class="col-md-2" v-if="derivar=={} && formulario.estado=='EN PROCESO'"><q-btn glossy no-caps color="orange-8" icon="archive" label="FINALIZAR" @click="finalizar()"  dense> <q-tooltip>Ha terminado Correctamente</q-tooltip></q-btn></div>
                 <div class="col-md-2" v-if="formulario.estado=='EN PROCESO'">
                     <q-btn-dropdown
                       v-if="derivar!={}"
@@ -132,9 +133,12 @@
                     <q-avatar icon="quiz" color="red-14" text-color="white" size="sm"/>
                     <span class="q-ml-sm text-h6 text-bold">SE HA CORREGIDO LA OBSERVACION?</span>
                 </q-card-section>
+                <q-card-section>
+                    <q-input v-model="motivo" type="text" label="Cancelado Razon" dense/>
+                </q-card-section>
                 <q-card-actions align="right">
                     <q-btn flat label="CERRAR" color="indigo" v-close-popup ><q-tooltip>Cerrar</q-tooltip></q-btn>
-                    <q-btn flat label="CANCELAR" color="red" v-close-popup ><q-tooltip>Suspende permanente el tramite </q-tooltip></q-btn>
+                    <q-btn flat label="CANCELAR" color="red" @click="formCancelar" ><q-tooltip>Suspende permanente el tramite </q-tooltip></q-btn>
                     <q-btn flat label="CONTINUAR" color="green" @click="formContinuar" ><q-tooltip>Corregido continua Tramite</q-tooltip></q-btn>
                 </q-card-actions>
             </q-card>
@@ -169,6 +173,21 @@
             </q-card-actions>
         </q-card>
     </q-dialog>
+    <q-dialog v-model="dialogComentario" >
+        <q-card>
+            <q-card-section class="row items-center">
+                <q-avatar icon="edit_note" color="indigo" text-color="white" size="sm" />
+                <span class="q-ml-sm">Agregue Comentario u Observacion</span>
+            </q-card-section>
+            <q-card-section>
+                <q-input v-model="lastLog.obs" type="text" label="Observacion" dense/>
+            </q-card-section>
+            <q-card-actions align="right">
+                <q-btn flat label="Cancelar" color="primary" v-close-popup />
+                <q-btn flat label="Actualizar" color="amber" @click="agrObservacion" />
+            </q-card-actions>
+        </q-card>
+    </q-dialog>
     </q-page>
 </template>
 <script>
@@ -177,7 +196,9 @@ export default {
     data() {
         return { 
             filename:'',
+            motivo:'',
             archivos:[],
+            dialogComentario:false,
             dialogUpload:false,
             dialogCont:false, 
             tab:1,
@@ -223,9 +244,56 @@ export default {
         
     },
     methods:{
+        agrObservacion(){
+            console.log(this.lastLog)
+            this.$api.post('agregarComentario',this.lastLog).then(() => {
+                this.dialogComentario=false
+            })
+        },
         formContinuar(){
             this.$api.put('rectificado/'+this.rectificados[0].id,this.rectificados[0]).then(() => {
                 this.$router.push('/asignacion/todo')
+            })
+        },
+        formCancelar(){
+            if(this.motivo=='' || this.motivo==undefined){
+                this.$q.notify({
+                message: 'Debe Ingresar Un Descripcion del Motivo.',
+                color: 'red',
+                icon:'info'
+                })
+                return false
+            }
+            this.$api.post('suspender', {id:this.formulario.id,log_id:this.lastLog.id,motivo:this.motivo}).then(() => {
+                this.$q.notify({
+                message: 'Tramite Cancelado',
+                color: 'red',
+                icon:'info'
+                })
+                this.$router.push('/asignacion/todo')
+            })
+
+        },
+        finalizar(){
+            $q.dialog({
+            title: 'FINALIZAR TRAMITE',
+            message: 'Ingrese al comentario *',
+            prompt: {
+                model: '',
+                isValid: val => val.length > 2, // << here is the magic
+                type: 'text' // optional
+            },
+            cancel: true,
+            persistent: true
+            }).onOk(data => {
+                this.$api.post('finalizar', {id:this.formulario.id,log_id:this.lastLog.id,motivo:data}).then(() => {
+                this.$q.notify({
+                message: 'Tramite finalizado',
+                color: 'green',
+                icon:'info'
+                })
+                this.$router.push('/asignacion/todo')
+            })
             })
         },
         async onDownload(adj){

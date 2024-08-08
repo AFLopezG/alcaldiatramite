@@ -17,8 +17,9 @@
             </template>
             <template v-slot:body-cell-op="props">
                 <q-td  :props="props" >
-                  <q-btn color="info" icon="change_circle" dense flat  @click="listUser(props.row)" v-if="validaAdmin"/> 
-                  <q-btn color="indigo" icon="timeline" dense flat  @click="getHistorial(props.row)"/> 
+                  <q-btn color="info" icon="change_circle" dense flat  @click="listUser(props.row)" v-if="validaAdmin && (props.row.estado!='FINALIZADO' || props.row.estado!='CANCELADO')"><q-tooltip>CAMBIAR DE USUARIO</q-tooltip></q-btn> 
+                  <q-btn color="indigo" icon="timeline" dense flat  @click="getHistorial(props.row)" ><q-tooltip>RUTA DE TRAMITE</q-tooltip></q-btn> 
+                  <q-btn color="cyan" icon="description" dense flat  @click="getAdjuntos(props.row)"><q-tooltip>ARCHIVOS ADJUNTOS</q-tooltip></q-btn> 
                 </q-td>
             </template>
             <template v-slot:body-cell-estado="props">
@@ -61,7 +62,8 @@
                             :title="hist.proceso.nombre"
                             :subtitle="hist.fecha +' '+ hist.hora"
                             side="left"
-                            :icon="hist.estado=='EN PROCESO'?'engineering':''"
+                            :icon="hist.estado=='EN PROCESO'?'engineering': hist.estado=='CANCELADO'?'block':hist.estado=='FINALIZADO'?'check_circle_outline':''"
+                            :color="hist.color"
                             v-for="hist in historial" :key="hist"
                             
                         >
@@ -78,6 +80,27 @@
                 </q-card-actions>
             </q-card>
         </q-dialog>
+        <q-dialog v-model="dialogfiles" >
+            <q-card style="width: 700px; max-width: 80vw;">
+                <q-card-section class="row items-center">
+                    <q-avatar icon="content_copy" color="primary" text-color="white" size="sm"/>
+                    <span class="q-ml-sm">Documentos adjuntos</span>
+                </q-card-section>
+                <q-card-section>
+                    <div class="row" v-for="datos in formulario.tramite.procesos" :key="datos" style="margin:20px">
+                        <div class="col-6 text-bold text-right" >{{ datos.nombre }}</div>
+                        <div class="col-6 text-center">
+                            <div v-for="arch in datos.archivos" :key="arch" style="margin: 10px;">{{ arch.nombre }} <q-btn color="info" flat icon="download" size="xs" @click="onDownload(arch)" /></div>
+                        </div>
+                        
+                    </div>
+                    
+                </q-card-section>
+                <q-card-actions align="right">
+                    <q-btn flat label="Cancel" color="primary" v-close-popup />
+                </q-card-actions>
+            </q-card>
+        </q-dialog>
     </q-page>
 </template>
 <script>
@@ -88,6 +111,7 @@ export default {
     name:'listadoPage',
     data() {
         return {
+            dialogfiles:false,
             store: globalStore(),
             validaAdmin:false,
             dialogHist:false,
@@ -98,6 +122,7 @@ export default {
             listado:[],
             listUsers:[],
             user:{name:''},
+            formulario:{},
             filter:'',
             fecha:moment().subtract(60, 'days').format('YYYY-MM-DD'),
             columns:[
@@ -118,6 +143,7 @@ export default {
         this.getTramite()
 
     },
+
     created(){
         console.log(this.store.profiles)
         this.validaAdmin=false
@@ -126,6 +152,24 @@ export default {
         });
     },
     methods:{
+        getAdjuntos(frm){
+        this.$api.post('formDoc',{id:frm.id}).then((res) => { 
+            this.formulario=res.data
+            console.log(res.data)
+            this.dialogfiles=true
+        })
+    },
+    async onDownload(adj){
+            try {
+
+        const response = await this.$api.get('download/'+adj.id, { responseType: 'blob' })
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+                    let pdfUrl = URL.createObjectURL(blob);
+                    window.open(pdfUrl,  'download');
+         } catch (error) {
+               console.error('Error al obtener el PDF', error);
+        }
+        },
         getHistorial(dato){
             this.$api.get('log/'+dato.id).then((res) => { 
                 console.log(res.data)

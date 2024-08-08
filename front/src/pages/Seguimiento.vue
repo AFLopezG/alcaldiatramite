@@ -42,7 +42,8 @@
                             :title="hist.proceso.nombre"
                             :subtitle="hist.fecha +' '+ hist.hora"
                             side="left"
-                            :icon="hist.estado=='EN PROCESO'?'engineering':''"
+                            :icon="hist.estado=='EN PROCESO'?'engineering': hist.estado=='CANCELADO'?'block':hist.estado=='FINALIZADO'?'check_circle_outline':''"
+                            :color="hist.color"
                             v-for="hist in historial" :key="hist"
                             
                         >
@@ -133,7 +134,7 @@ export default {
             icon:'info'
             })
           }
-         this.$api.post('listForm',{searchtext:this.buscar}).then((res) => {
+         this.$api.post('listForm2',{searchtext:this.buscar}).then((res) => {
           console.log(res.data)
             if(res.data=='')
             this.$q.notify({

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->date('fecha');
             $table->time('hora');            
-            $table->string('obs')->nullable();
+            $table->text('obs')->nullable();
             $table->string('estado');
             $table->integer('orden');
 

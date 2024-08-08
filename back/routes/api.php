@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 */
 Route::post('login', [App\Http\Controllers\UserController::class, 'login']);
 Route::post('/consulta',[\App\Http\Controllers\FormularioController::class,'consulta']);
-Route::post('/listForm',[\App\Http\Controllers\FormularioController::class,'listForm']);
+Route::post('/listSearch',[\App\Http\Controllers\FormularioController::class,'listSearch']);
 Route::post('/consprop',[\App\Http\Controllers\FormularioController::class,'consprop']);
 
 //Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -47,7 +47,7 @@ Route::post('/consprop',[\App\Http\Controllers\FormularioController::class,'cons
         Route::apiResource('/rectificado',\App\Http\Controllers\RectificadoController::class);
         Route::apiResource('/adjunto',\App\Http\Controllers\AdjuntoController::class);
         Route::post('/unitTramite',[\App\Http\Controllers\TramiteController::class,'unitTramite']); 
-        Route::post('/listForm2',[\App\Http\Controllers\FormularioController::class,'listForm2']);
+        Route::post('/listForm',[\App\Http\Controllers\FormularioController::class,'listForm']);
         
         Route::post('/micorreo',[\App\Http\Controllers\FormularioController::class,'micorreo']);
         Route::post('/searchProp',[\App\Http\Controllers\PropietarioController::class,'searchProp']);
@@ -91,6 +91,9 @@ Route::post('/consprop',[\App\Http\Controllers\FormularioController::class,'cons
         Route::post('/listTramite',[\App\Http\Controllers\FormularioController::class,'listTramite']); 
         Route::post('/listProcUser',[\App\Http\Controllers\TramiteController::class,'listProcUser']); 
         Route::post('/cambioUserProc',[\App\Http\Controllers\TramiteController::class,'cambioUserProc']); 
+
+        Route::post('/agregarComentario',[\App\Http\Controllers\FormularioController::class,'agregarComentario']); 
+        Route::post('/formDoc',[\App\Http\Controllers\FormularioController::class,'formDoc']); 
         
         
 });

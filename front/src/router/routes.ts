@@ -35,8 +35,8 @@ const routes: RouteRecordRaw[] = [
     component: Login
   },
   {
-    path: '/consulta',
-    component: Consulta
+    path: '/consulta/:codigo*',
+    component: Consulta,
   },
   // Always leave this as last one,
   // but you can also remove it

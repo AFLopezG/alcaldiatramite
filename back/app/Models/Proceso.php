@@ -23,8 +23,4 @@ class Proceso extends Model
         return $this->belongsToMany(Tramite::class)->withPivot('orden');
     }
 
-    public function proceso_tramite()
-    {
-        return $this->belongsToMany(Tramite::class, 'proceso_tramite');
-    }
 }

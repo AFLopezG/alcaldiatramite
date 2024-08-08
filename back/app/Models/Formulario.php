@@ -37,6 +37,10 @@ class Formulario extends Model
         return $this->belongsTo(Tramite::class)->with('requisitos')->with('unit');
     }
 
+    public function tramite2(){
+        return $this->belongsTo(Tramite::class)->with('procesos');
+    }
+
     public function propietario(){
         return $this->belongsTo(Propietario::class);
     }
@@ -61,4 +65,5 @@ class Formulario extends Model
     {
         return $this->hasOne(Log::class)->with('user2')->with('proceso')->latestOfMany();
     }
+
 }

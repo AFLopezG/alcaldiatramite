@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\Tramite;
 use App\Models\Unit;
 use App\Models\Delegado;
+use App\Models\Adjunto;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
@@ -62,21 +63,45 @@ class FormularioController extends Controller
      public function suspender(Request $request){
 
         $formulario = Formulario::find($request->id);
-        $formulario->estado='SUSPENDIDO';
-        $formulario->observacion=$request->observacion;
+        $formulario->estado='CANCELADO';
+        $formulario->observacion=$request->motivo;
         $formulario->save();
 
-        $log=Log::where('formulario_id',$request->id)->orderBy('id','desc')->first();
-        $log->obs = $log->obs.'  '.$request->observacion;
+        $log2=Log::where('id',$request->log_id)->first();
+        $log=new Log();
+        $log->formulario_id=$formulario->id;
+        $log->user_id=$log2->user_id;
+        $log->user_id2=$request->user()->id;
+        $log->fecha=date('Y-m-d');
+        $log->hora=date('H:i:s');
+        $log->proceso_id=$log2->proceso_id;
+        $log->orden=$log2->orden;
+        $log->estado='CANCELADO';
+        $log->obs = ' * '.$request->motivo;
         $log->save();
     }
 
     public function finalizar(Request $request){
         $formulario = Formulario::find($request->id);
         $formulario->estado='FINALIZADO';
-        $formulario->observacion=$request->observacion;
+        $formulario->observacion=$request->motivo;
         $formulario->save();
+
+
+        $log2=Log::where('id',$request->log_id)->first();
+        $log=new Log();
+        $log->formulario_id=$formulario->id;
+        $log->user_id=$log2->user_id;
+        $log->user_id2=$request->user()->id;
+        $log->fecha=date('Y-m-d');
+        $log->hora=date('H:i:s');
+        $log->proceso_id=$log2->proceso_id;
+        $log->orden=$log2->orden;
+        $log->estado='FINALIZADO';
+        $log->obs = ' * '.$request->motivo;
+        $log->save();
     }
+
     public function habilitar(Request $request){
         $formulario = Formulario::find($request->id);
         $formulario->estado='PROCESO';
@@ -290,7 +315,6 @@ class FormularioController extends Controller
         return response(['message' => 'YA SE ENCUENTRA REGISTRADO'],500);
     }
 
-
         $formulario=Formulario::find($request->id);
         $formulario->numero=$numero;
         $formulario->gestion=$gestion;
@@ -323,42 +347,47 @@ class FormularioController extends Controller
             switch($request->estado){
                 case 'proceso':
                     $resultado=Formulario::with(['tramite','propietario','delegado','latestLog'])
+                    ->where('estado','EN PROCESO')
                     ->whereHas('latestLog', function($query) use ($user) {
                         $query->where('user_id2', $user);
-                    })->where('estado','EN PROCESO')
+                    })
                     ->get();
                     break;
                 case 'finalizado':
                     $resultado=Formulario::with(['tramite','propietario','delegado','latestLog'])
+                    ->where('estado','FINALIZADO')
                     ->whereHas('latestLog', function($query) use ($user) {
                         $query->where('user_id2', $user);
                         $query->whereDate('fecha','<=',date('Y-m-d'));
                         $query->whereDate('fecha','>=',date('Y-m-d', strtotime('-180 days')));
-                    })->where('estado','FINALIZADO')
+                    })
                     ->get();
                     break;
                 case 'cancelado':
                     $resultado=Formulario::with(['tramite','propietario','delegado','latestLog'])
+                    ->where('estado','CANCELADO')
                     ->whereHas('latestLog', function($query) use ($user) {
                         $query->where('user_id2', $user);
                         $query->whereDate('fecha','<=',date('Y-m-d'));
                         $query->whereDate('fecha','>=',date('Y-m-d', strtotime('-180 days')));
-                    })->where('estado','CANCELADO')
+                    })
                     ->get();
                     break;
                 case 'rectificar':
                     $resultado=Formulario::with(['tramite','propietario','delegado','latestLog'])
+                    ->where('estado','RECTIFICAR')
                     ->whereHas('latestLog', function($query) use ($user) {
                         $query->where('user_id2', $user);
-                    })->where('estado','RECTIFICAR')
+                    })
                     ->get();
                     break;
                 case 'todo':
                 default:
                     $resultado=Formulario::with(['tramite','propietario','delegado','latestLog'])
+                    ->whereIn('estado',['EN PROCESO','RECTIFICAR'])
                     ->whereHas('latestLog', function($query) use ($user) {
                         $query->where('user_id2', $user);
-                    })->whereIn('estado',['EN PROCESO','RECTIFICAR'])
+                    })
                     ->get();
                 break;
             }
@@ -457,10 +486,6 @@ class FormularioController extends Controller
     }
 
 
-
-
-
-
      public function listForm(Request $request){
         $searchtext=$request->searchtext;
         $resul=DB::SELECT("SELECT f.id 
@@ -473,20 +498,23 @@ class FormularioController extends Controller
             array_push($list,$value->id);
         }
         //return $resul;
-        return Formulario::with('tramite')->with('propietario')->whereIn('id',$list)->get();
-    
+        return Formulario::with('tramite')->with('propietario')->whereIn('id',$list)->get();    
         
-
-
     } 
     
-    public function listForm2(Request $request){
+    public function listSearch(Request $request){
+        $searchtext=$request->searchtext;
+        $resul=DB::SELECT("SELECT f.id 
+        from formularios f inner join tramites t on f.tramite_id=t.id inner join propietarios p on f.propietario_id=p.id
+        where f.codigo like '%$searchtext%' or p.cedula like '%$searchtext%' or p.nombre like '%$searchtext%' or p.apellido like '%$searchtext%' limit 15; ");
 
-        return Formulario::where('gestion',$request->gestion)
-        ->where('numero',$request->numero)
-        ->where('tramite_id',$request->tramite_id)
-        ->whereNull('deleted_at')
-        ->with('propietario')->with('tramite')->get();
+        $list=[];
+        foreach ($resul as $value) {
+            # code...
+            array_push($list,$value->id);
+        }
+        //return $resul;
+        return Formulario::with('tramite')->with('propietario')->whereIn('id',$list)->get();    
     }
 
     public function consprop(Request $request){
@@ -506,13 +534,30 @@ class FormularioController extends Controller
         $cadena='';
         $formulario  = Formulario::find($id);
         $propietario=Propietario::find($formulario->propietario_id);
-        $tramite=Tramite::where('id',$formulario->tramite_id)->first();
+        $tramite=Tramite::with('procesos')->where('id',$formulario->tramite_id)->first();
         $unit = Unit::find($formulario->unit_id);
         $detalle='';
-        for ($i=0; $i < 7; $i++) {
+        foreach ($tramite->procesos as $value) {
             # code...
-            $detalle.=" <tr class='cajetin'><td style='border:1px solid; border-radius: 12px; vertical-align: text-top; '><div class='casilla'></div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DESTINATARIO: <div style='font-size:12px; text-align:right; left: -100px; position:relative'>FECHA RECIBIDO</div>
-            <div style='font-size:10px; text-align:right; left: -220px; top:50px; position:relative'>FIRMA Y SELLO</div></td></tr>";
+            $proc=Log::with('user2')->where('formulario_id',$id)->where('proceso_id',$value['id'])->orderBy('id','desc')->first();
+            $username='';
+            $fecha='';
+            $hora='';
+            $estado='';
+            $obs='';
+            if(isset($proc)){
+                $username=$proc->user2->name;
+                $fecha=$proc->fecha;
+                $hora=$proc->hora;
+                $estado=$proc->estado;
+                $obs=$proc->obs;
+            }
+            $detalle.=" <tr class='cajetin'>
+            <td style='border:1px solid; border-radius: 12px; vertical-align: text-top; position:relative'>
+            <div class='casilla'></div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>".$value['nombre']." : </b> <span style='font-size: 12px; font-style: italic;'>".$estado."</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".$username ."<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".$obs." 
+            <div style='font-size:12px; text-align:right; right: 15px; position:absolute'><b>FECHA RECIBIDO</b><br>".$fecha." ".$hora. "</div>
+            <div style='font-size:10px; text-align:right; right: 150px; bottom:5px; position:absolute'>FIRMA Y SELLO</div>
+            </td></tr>";
         }
         $cadena="<html><style>
         .cuerpo{
@@ -546,7 +591,7 @@ class FormularioController extends Controller
 
         </style>
         <body class='cuerpo'> <div style='margin: 0 0 0 15px;'>
-        <div class='titulo'>GOBIERNO AUTONOMO MUNICIPAL DE ORURO</div>
+        <div class='titulo' style='position:relative'><img style='position:absolute; width:100px; height:100px; top:-20px; left:-10px;' src='gamo.jpg'>GOBIERNO AUTONOMO MUNICIPAL DE ORURO</div>
         <div class='titulo'>".$unit->nombre."</div>
         <br>
         <table class='table1'><tr><td style='width:50%;' class='titulo'>HOJA DE RUTA<br><span style='text-size:8px;'>Uso interno</span></td><td ><b>CODIGO:</b></td><td style='border: 1px solid; text-align:center; font-size: 24px;'>".$formulario->codigo."</td></tr></table>
@@ -562,5 +607,22 @@ class FormularioController extends Controller
         </body>
         </html>";
         return $cadena;
+    }
+
+    public function agregarComentario(Request $request){
+        $log=Log::find($request->id);
+        $log->obs=$request->obs;
+        $log->save();
+
+    }
+
+    public function formDoc(Request $request){
+        $form=Formulario::where('id',$request->id)->with('tramite2')->first();
+        foreach ($form->tramite['procesos'] as $value) {
+            # code...
+            $value['archivos']=Adjunto::where('formulario_id',$form->id)->where('proceso_id',$value['id'])->get();
+        }
+
+        return $form;
     }
 }

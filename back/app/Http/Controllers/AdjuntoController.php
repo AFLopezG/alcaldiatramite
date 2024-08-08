@@ -45,7 +45,7 @@ class AdjuntoController extends Controller
     public function show($id)
     {
         //
-        return Adjunto::where('formulario_id',$id)->get();
+        return Adjunto::with('proceso')->where('formulario_id',$id)->get();
 
     }
 

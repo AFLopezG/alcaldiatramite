@@ -16,4 +16,8 @@ class Adjunto extends Model
     'formulario_id',
     'proceso_id',
     ];
+
+    public function proceso(){
+        return $this->belongsTo(Proceso::class);
+    }
 }
