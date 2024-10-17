@@ -150,8 +150,8 @@
     <q-dialog v-model="dialogUpload">
         <q-card>
             <q-card-section class="row items-center">
-                <q-avatar icon="signal_wifi_off" color="primary" text-color="white" />
-                <span class="q-ml-sm">You are currently not connected to any network.</span>
+                <q-avatar icon="drive_folder_upload" color="primary" text-color="white" size="sm"/>
+                <span class="q-ml-sm">Adjuntar Archivo PDF.</span>
             </q-card-section>
             <q-card-section>
                 <q-input dense v-model="filename" type="text" label="1. Nombre/Descripcion" />

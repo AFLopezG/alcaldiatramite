@@ -134,7 +134,7 @@ export default {
             icon:'info'
             })
           }
-         this.$api.post('listForm2',{searchtext:this.buscar}).then((res) => {
+         this.$api.post('listForm',{searchtext:this.buscar}).then((res) => {
           console.log(res.data)
             if(res.data=='')
             this.$q.notify({

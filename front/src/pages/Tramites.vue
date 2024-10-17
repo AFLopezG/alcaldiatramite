@@ -32,7 +32,7 @@
         </template>
             <template v-slot:body-cell-op="props">
             <q-td key="op" :props="props">
-                <q-btn color="yellow" icon="edit" dense flat @click="tramite=props.row;dialogTram=true" />       
+                <q-btn color="yellow" icon="edit" dense flat @click="tramite=props.row;unit=props.row.unit;dialogTram=true" />       
                 <q-btn color="red" icon="delete" dense flat @click="deleteTram(props.row)" />       
             </q-td>
         </template>
