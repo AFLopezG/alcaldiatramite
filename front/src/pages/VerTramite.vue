@@ -8,7 +8,7 @@
         <q-card-section>
             <div class="text-bold q-pa-xs text-center" style="font-size: 14px;" >DATOS DE TRAMITE : {{ formulario.codigo }} <span style="color:red; font-size: 18px;" v-if="formulario.estado=='RECTIFICAR' || formulario.estado=='CANCELADO'">{{ formulario.estado }}</span></div>
         <div class="row" >
-            <div class="col-md-6 col-xs-12"> <b class="q-pa-xs">TRAMITE : </b> {{ tramite.nombre }}</div> 
+            <div class="col-md-6 col-xs-12"> <b class="q-pa-xs">TRAMITE : </b> {{ tramite.nombre }}</div>
             <div class="col-md-2 col-xs-4"><b class="q-pa-xs">FECHA ING: </b>{{ formulario.fecha }}</div>
             <div class="col-md-2 col-xs-4" v-if="formulario.distrito!='' || formulario.distrito!=null"><b class="q-pa-xs">DISTRITO :  </b>{{ formulario.distrito }}</div>
             <div class="col-md-2 col-xs-4"><q-btn color="indigo-4" icon="edit_note" label="Observacion" @click="dialogComentario=true" size="sm" v-if="formulario.estado=='EN PROCESO'"><q-tooltip>OPCIONAL Comentario</q-tooltip></q-btn></div>
@@ -36,7 +36,7 @@
         </q-card-section>
     </q-card>
     <div>
-    
+
      <div class="row">
         <div class="col-6">
             <q-card class="my-card" style="font-size: 12px;">
@@ -55,7 +55,7 @@
                    <template  v-slot:body-cell-op="props">
                 <q-td  key="op" :props="props" >
                     <q-btn color="indigo" flat icon="download" size="sm" @click="onDownload(props.row)"/>
-             
+
                 </q-td>
             </template>
                    </q-table>
@@ -85,7 +85,7 @@
                             <span v-else>{{ props.row.dias }}</span>
                         </q-td>
                     </template>
-                   </q-table> 
+                   </q-table>
                 </q-card-section>
             </q-card>
         </div>
@@ -96,10 +96,10 @@
                 <div class="col-md-2" v-if="formulario.estado=='RECTIFICAR'"><q-btn glossy no-caps color="amber-10" icon="question_mark" label="CONTINUAR" @click="dialogCont=true"  dense ><q-tooltip >Regularizado Observacion</q-tooltip></q-btn></div>
                 <div class="col-md-2" v-if="tab>1 && formulario.estado=='EN PROCESO'"><q-btn glossy no-caps color="red-7" icon="keyboard_return" label="RECHAZAR" @click="devolver()"  dense ><q-tooltip>Devuelve al anterior</q-tooltip></q-btn></div>
                 <div class="col-md-2" v-if="formulario.estado=='EN PROCESO'"><q-btn glossy no-caps color="red-10" icon="archive" label="RECTIFICAR"  @click="observar()" dense> <q-tooltip >Informacion Incompleta o Erronea</q-tooltip></q-btn></div>
-                <div class="col-md-2" v-if="derivar=={} && formulario.estado=='EN PROCESO'"><q-btn glossy no-caps color="orange-8" icon="archive" label="FINALIZAR" @click="finalizar()"  dense> <q-tooltip>Ha terminado Correctamente</q-tooltip></q-btn></div>
+                <div class="col-md-2" v-if="derivar=='' && formulario.estado=='EN PROCESO'"><q-btn glossy no-caps color="orange-8" icon="archive" label="FINALIZAR" @click="finalizar()"  dense> <q-tooltip>Ha terminado Correctamente</q-tooltip></q-btn></div>
                 <div class="col-md-2" v-if="formulario.estado=='EN PROCESO'">
                     <q-btn-dropdown
-                      v-if="derivar!={}"
+                      v-if="derivar!=''"
                         split
                         color="indigo-8"
                         push
@@ -194,16 +194,16 @@
 import moment from 'moment';
 export default {
     data() {
-        return { 
+        return {
             filename:'',
             motivo:'',
             archivos:[],
             dialogComentario:false,
             dialogUpload:false,
-            dialogCont:false, 
+            dialogCont:false,
             tab:1,
-            propietario:{},  
-            delegado:{},  
+            propietario:{},
+            delegado:{},
             rectificados:[],
             tramiteid:this.$route.params.tr,
             id:this.$route.params.id,
@@ -222,16 +222,16 @@ export default {
                 {label:'NOMBRE',name:'nombre',field:'nombre',align:'left'},
 
             ]
-            
+
         }
     },
     mounted(){
         this.$watch(() => this.$route.params,
       (toParams) => {
          console.log(toParams)
-        this.id=toParams.id 
+        this.id=toParams.id
         this.tramiteid=toParams.tr
-        this.getForm() 
+        this.getForm()
         this.getTramite()
       }
     )
@@ -239,9 +239,9 @@ export default {
 
     },
     created(){
-        this.getForm() 
+        this.getForm()
         this.getTramite()
-        
+
     },
     methods:{
         agrObservacion(){
@@ -427,8 +427,8 @@ export default {
         }).onDismiss(() => {
             // console.log('I am triggered on both OK and Cancel')
         })
-            
-            
+
+
         },
         onRejected (rejectedEntries) {
             console.log(rejectedEntries)
@@ -463,15 +463,21 @@ export default {
 
             });
             this.getNextProc()
-            this.getAdjuntos() 
+            this.getAdjuntos()
         })
         },
         getNextProc(){
             this.$api.post('nextProc',{id:this.tramiteid,orden:this.tab}).then(res => {
                 console.log(res.data)
+                console.log(res.data.length)
+                if(res.data)
                 this.derivar=res.data
+                else
+                this.derivar=''
+
+
             })
-                
+
         }
 
     }

@@ -77,7 +77,7 @@ class TramiteController extends Controller
 
     public function agregarProceso(Request $request ){
         $valida = DB::SELECT("SELECT * from proceso_tramite where proceso_id=$request->proceso_id and tramite_id=$request->tramite_id and orden = $request->orden");
-        
+
         if(sizeof($valida)==0)
         {
             DB::SELECT("INSERT INTO proceso_tramite  (proceso_id,tramite_id,orden) values ($request->proceso_id, $request->tramite_id,$request->orden)");
@@ -169,7 +169,7 @@ class TramiteController extends Controller
             where u.state='ACTIVO' and p.profile_id in (select pp.profile_id from procesos pr inner join proceso_profile pp on pr.id = pp.proceso_id where pr.id=$value->id)");
             $value->usuarios=$users;
             if(sizeof($users)==0)
-                return false;
+                return response(['message' => 'Fin de Tramite'],400);
             return $value;
         }
 
@@ -184,7 +184,7 @@ class TramiteController extends Controller
         })
         ->get();*/
     }
-    
+
     public function listProcUser(Request $request){
         $r1=Proceso::with('profiles')->where('id',$request->id)->first();
         $list=[];
@@ -229,8 +229,8 @@ class TramiteController extends Controller
         $log->obs=$log->obs.' * '.$request->comentario;
         $log->estado='RECHAZADO';
         $log->save();
-        
-        $norden=$log->orden - 1; 
+
+        $norden=$log->orden - 1;
 
         $r1=Tramite::with('procesos')->where('id',$request->tramite_id)->first();
         //return $r1;
@@ -239,8 +239,8 @@ class TramiteController extends Controller
                 $proceso=$value;
             }
         }
-        
-        
+
+
         $log2=new Log();
         $log2->formulario_id= $log->formulario_id;
         $log2->user_id=$log->user_id2;
