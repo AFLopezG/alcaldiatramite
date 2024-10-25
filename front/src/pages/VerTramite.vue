@@ -275,7 +275,7 @@ export default {
 
         },
         finalizar(){
-            $q.dialog({
+            this.$q.dialog({
             title: 'FINALIZAR TRAMITE',
             message: 'Ingrese al comentario *',
             prompt: {
